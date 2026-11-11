@@ -692,44 +692,113 @@ function recalculateStaticScores() {
   saveStaticState();
 }
 
+function extractXmlArticleLink(item, fallbackUrl) {
+  // 1. Check Atom <link rel="alternate" href="..."> or any <link href="...">
+  const links = Array.from(item.querySelectorAll('link'));
+  const altLink = links.find(l => {
+    const rel = (l.getAttribute('rel') || '').toLowerCase();
+    return (!rel || rel === 'alternate') && l.getAttribute('href');
+  });
+  if (altLink) {
+    const href = altLink.getAttribute('href').trim();
+    if (/^https?:\/\//i.test(href)) return href;
+  }
+
+  // 2. Check RSS 2.0 <link>https://...</link> text content
+  for (const l of links) {
+    const txt = (l.textContent || '').trim();
+    if (/^https?:\/\//i.test(txt)) return txt;
+  }
+
+  // 3. Check <guid> if it is a URL
+  const guidNode = item.querySelector('guid, id');
+  const guidText = (guidNode?.textContent || '').trim();
+  if (/^https?:\/\//i.test(guidText)) return guidText;
+
+  return fallbackUrl;
+}
+
+async function fetchFeedRawXmlOrJson(feedUrl) {
+  // Strategy 1: rss2json (very reliable on mobile & GitHub Pages, returns clean per-item links)
+  try {
+    const r2j = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
+    if (r2j.ok) {
+      const json = await r2j.json();
+      if (json.status === 'ok' && Array.isArray(json.items) && json.items.length > 0) {
+        return { type: 'json', items: json.items };
+      }
+    }
+  } catch {}
+
+  // Strategy 2: AllOrigins raw XML
+  try {
+    const ao = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`);
+    if (ao.ok) {
+      const data = await ao.json();
+      if (data.contents && data.contents.includes('<')) {
+        return { type: 'xml', xml: data.contents };
+      }
+    }
+  } catch {}
+
+  // Strategy 3: corsproxy.io raw XML
+  try {
+    const cp = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(feedUrl)}`);
+    if (cp.ok) {
+      const xml = await cp.text();
+      if (xml && xml.includes('<')) {
+        return { type: 'xml', xml };
+      }
+    }
+  } catch {}
+
+  throw new Error(`Could not reach feed (${feedUrl})`);
+}
+
 async function fetchRssFeedStatic(feed) {
-  // Uses CORS-friendly proxy on GitHub Pages
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feed.url)}`;
-  const res = await fetch(proxyUrl);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  const xmlText = data.contents || '';
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(xmlText, 'text/xml');
-  const items = Array.from(doc.querySelectorAll('item, entry')).slice(0, 12);
+  const payload = await fetchFeedRawXmlOrJson(feed.url);
+  let normalizedItems = [];
+
+  if (payload.type === 'json') {
+    normalizedItems = payload.items.slice(0, 12).map(it => ({
+      title: (it.title || '').replace(/<[^>]+>/g, '').trim(),
+      url: (it.link || it.guid || feed.url).trim(),
+      guid: (it.guid || it.link || `${feed.id}:${it.title}`).trim(),
+      rawDesc: it.description || it.content || '',
+      pubText: it.pubDate || ''
+    }));
+  } else {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(payload.xml, 'text/xml');
+    const items = Array.from(doc.querySelectorAll('item, entry')).slice(0, 12);
+    normalizedItems = items.map(item => ({
+      title: (item.querySelector('title')?.textContent || '').trim(),
+      url: extractXmlArticleLink(item, feed.url),
+      guid: (item.querySelector('guid, id')?.textContent || extractXmlArticleLink(item, feed.url) || `${feed.id}:${item.querySelector('title')?.textContent || ''}`).trim(),
+      rawDesc: item.querySelector('description, summary, content')?.textContent || '',
+      pubText: item.querySelector('pubDate, published, updated')?.textContent || ''
+    }));
+  }
 
   let added = 0;
-  for (const item of items) {
-    const title = (item.querySelector('title')?.textContent || '').trim();
-    if (!title) continue;
-    const linkNode = item.querySelector('link');
-    const url = (linkNode?.getAttribute('href') || linkNode?.textContent || feed.url).trim();
-    const guid = (item.querySelector('guid, id')?.textContent || url || `${feed.id}:${title}`).trim();
+  for (const item of normalizedItems) {
+    if (!item.title) continue;
+    if (state.allArticles.some(a => a.guid === item.guid || a.url === item.url)) continue;
 
-    if (state.allArticles.some(a => a.guid === guid)) continue;
-
-    const rawDesc =
-      item.querySelector('description, summary, content')?.textContent || '';
-    const snippet = rawDesc.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 800);
-    const pubText = item.querySelector('pubDate, published, updated')?.textContent;
-    const publishedAt = pubText && !isNaN(new Date(pubText).getTime())
-      ? new Date(pubText).toISOString()
+    const snippet = item.rawDesc.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 800);
+    const publishedAt = item.pubText && !isNaN(new Date(item.pubText).getTime())
+      ? new Date(item.pubText).toISOString()
       : new Date().toISOString();
 
-    const topics = extractTopicsClient(title, snippet, feed.category);
-    const { summary, takeaways } = generateExtractiveSummaryClient(title, snippet);
+    const topics = extractTopicsClient(item.title, snippet, feed.category);
+    const { summary, takeaways } = generateExtractiveSummaryClient(item.title, snippet);
     const newArt = {
       id: Date.now() + Math.floor(Math.random() * 100000),
-      guid,
+      guid: item.guid,
       category: feed.category,
       source_title: feed.title,
-      title,
-      url,
+      title: item.title,
+      url: item.url,
       published_at: publishedAt,
       raw_snippet: snippet,
       ai_summary: summary,
@@ -746,6 +815,17 @@ async function fetchRssFeedStatic(feed) {
     state.allArticles.unshift(newArt);
     added++;
   }
+
+  // Once real articles exist for this category, remove placeholder seed-* demo articles for it
+  const hasRealArticlesInCat = state.allArticles.some(
+    a => a.category === feed.category && !String(a.guid).startsWith('seed-')
+  );
+  if (hasRealArticlesInCat) {
+    state.allArticles = state.allArticles.filter(
+      a => a.category !== feed.category || !String(a.guid).startsWith('seed-')
+    );
+  }
+
   return added;
 }
 
@@ -919,11 +999,18 @@ function renderNavigation() {
   }
 
   document.querySelectorAll('[data-cat]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       state.activeCategory = btn.dataset.cat;
       document.getElementById('briefing-panel').classList.add('hidden');
       renderNavigation();
-      loadArticles();
+      await loadArticles();
+      // Auto-sync live RSS articles if this category currently only has demo seed articles
+      if (
+        state.activeCategory !== 'saved' &&
+        state.articles.every(a => String(a.guid).startsWith('seed-'))
+      ) {
+        triggerSyncFeeds(true);
+      }
     });
   });
 }
@@ -1317,7 +1404,8 @@ function renderFeedsModalList() {
   });
 }
 
-async function triggerSyncFeeds() {
+async function triggerSyncFeeds(isAuto = false) {
+  const autoMode = isAuto === true;
   const btnSync = document.getElementById('btn-sync-feeds');
   const btnMobileSync = document.getElementById('btn-mobile-sync');
   btnSync.disabled = true;
@@ -1333,7 +1421,9 @@ async function triggerSyncFeeds() {
       });
       await initAppModeAndState();
       await loadArticles();
-      showToast(`Synced ${res.syncedFeeds} feeds in ${state.activeCategory} • ${res.totalInserted} new articles!`);
+      if (!autoMode || res.totalInserted > 0) {
+        showToast(`Synced ${res.syncedFeeds} feeds in ${state.activeCategory} • ${res.totalInserted} new articles!`);
+      }
     } else {
       const targetFeeds = state.activeCategory === 'saved'
         ? state.feeds
@@ -1347,10 +1437,12 @@ async function triggerSyncFeeds() {
       recalculateStaticScores();
       renderNavigation();
       await loadArticles();
-      showToast(`Synced ${targetFeeds.length} feeds • ${totalAdded} new articles ranked!`);
+      if (!autoMode || totalAdded > 0) {
+        showToast(`Synced ${targetFeeds.length} feeds • ${totalAdded} live articles loaded!`);
+      }
     }
   } catch (err) {
-    showToast(`Sync error: ${err.message}`);
+    if (!autoMode) showToast(`Sync error: ${err.message}`);
   } finally {
     btnSync.disabled = false;
     if (btnMobileSync) btnMobileSync.disabled = false;
@@ -1782,4 +1874,8 @@ function bindGlobalListeners() {
   bindGlobalListeners();
   await initAppModeAndState();
   await loadArticles();
+  // Auto-fetch live RSS articles on initial launch if only seed placeholder articles are present
+  if (state.articles.every(a => String(a.guid).startsWith('seed-'))) {
+    triggerSyncFeeds(true);
+  }
 })();

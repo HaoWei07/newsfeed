@@ -233,6 +233,10 @@ export async function fetchSingleFeed(feed) {
       throw err;
     }
 
+    if (insertedCount > 0) {
+      db.prepare("DELETE FROM articles WHERE category = ? AND guid LIKE 'seed-%'").run(feed.category);
+    }
+
     db.prepare('UPDATE feeds SET last_fetched_at = ?, last_error = NULL WHERE id = ?').run(
       new Date().toISOString(),
       feed.id
