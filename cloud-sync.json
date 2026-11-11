@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-11T09:48:23.719Z",
+  "updated_at": "2026-11-11T09:48:28.888Z",
   "persona": {
     "bio_summary": "Curious reader based in Singapore who follows global geopolitics, climate tech and clean energy policy, AI & software breakthroughs, fundamental science discoveries, and Singapore urban/economic developments. Prefers high-signal, analytical reporting over sensationalism or clickbait.",
     "preferred_depth": "balanced",
@@ -10,17 +10,19 @@
       "Climate Science": 5,
       "AI & LLMs": 4.5,
       "Singapore Policy": 4,
-      "Geopolitics": 3,
+      "Geopolitics": 8,
       "Space & Physics": 3,
-      "Biotech & Medicine": 2.5,
+      "Biotech & Medicine": 7.5,
       "ASEAN Economy": 3.5,
       "Public Transport & Urban Planning": 3,
       "Celebrity Gossip": -5,
       "Sponsored Content": -6
     },
     "topic_keywords": {},
-    "source_weights": {},
-    "interactions_count": 0,
+    "source_weights": {
+      "BBC News - World": 2
+    },
+    "interactions_count": 2,
     "interactions_since_synthesis": 0
   },
   "feeds": [
@@ -115,7 +117,20 @@
       "category": "singapore"
     }
   ],
-  "recentLogs": [],
+  "recentLogs": [
+    {
+      "article_title": "US warns Madagascar over growing military ties with Russia",
+      "action": "like",
+      "delta_summary": "Upvoted: Biotech & Medicine (+2.5), Geopolitics (+2.5)",
+      "created_at": "2026-11-11T09:48:27.665Z"
+    },
+    {
+      "article_title": "US warns Madagascar over growing military ties with Russia",
+      "action": "like",
+      "delta_summary": "Upvoted: Biotech & Medicine (+2.5), Geopolitics (+2.5)",
+      "created_at": "2026-11-11T09:48:26.520Z"
+    }
+  ],
   "articleStates": {
     "https://www.bbc.co.uk/news/articles/crkgv58pknyeo#1": {
       "is_read": true,
