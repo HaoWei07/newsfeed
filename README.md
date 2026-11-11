@@ -19,11 +19,3 @@ An adaptive RSS aggregator and personal news intelligence dashboard designed to 
    - Built on the official `@google/genai` SDK (`ai.interactions.create` with structured JSON output schemas).
    - Generates 2–3 sentence high-signal summaries, 3 bullet takeaways, normalized topic tags, and a personalized `1–99%` relevance match score with an explanation badge.
 
-## Quick Start
-
-```bash
-cd "C:\Users\Hao Wei\.gemini\antigravity\scratch\pulse-rss-reader"
-npm start
-```
-
-Then open **http://localhost:3456** in your browser.
