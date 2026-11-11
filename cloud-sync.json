@@ -1,0 +1,121 @@
+{
+  "updated_at": "2026-11-11T09:41:40.180Z",
+  "persona": {
+    "bio_summary": "Curious reader based in Singapore who follows global geopolitics, climate tech and clean energy policy, AI & software breakthroughs, fundamental science discoveries, and Singapore urban/economic developments. Prefers high-signal, analytical reporting over sensationalism or clickbait.",
+    "preferred_depth": "balanced",
+    "topic_weights": {
+      "Geology & Geotechnics": 6,
+      "Geodesy & Geospatial Analytics": 6,
+      "Clean Energy": 5,
+      "Climate Science": 5,
+      "AI & LLMs": 4.5,
+      "Singapore Policy": 4,
+      "Geopolitics": 3,
+      "Space & Physics": 3,
+      "Biotech & Medicine": 2.5,
+      "ASEAN Economy": 3.5,
+      "Public Transport & Urban Planning": 3,
+      "Celebrity Gossip": -5,
+      "Sponsored Content": -6
+    },
+    "topic_keywords": {},
+    "source_weights": {},
+    "interactions_count": 0,
+    "interactions_since_synthesis": 0,
+    "dismissed_topics": []
+  },
+  "feeds": [
+    {
+      "id": 1,
+      "title": "BBC News - World",
+      "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
+      "category": "world"
+    },
+    {
+      "id": 2,
+      "title": "The Guardian - World News",
+      "url": "https://www.theguardian.com/world/rss",
+      "category": "world"
+    },
+    {
+      "id": 3,
+      "title": "Al Jazeera - All News",
+      "url": "https://www.aljazeera.com/xml/rss/all.xml",
+      "category": "world"
+    },
+    {
+      "id": 4,
+      "title": "Carbon Brief",
+      "url": "https://www.carbonbrief.org/feed/",
+      "category": "climate"
+    },
+    {
+      "id": 5,
+      "title": "The Guardian - Environment",
+      "url": "https://www.theguardian.com/environment/rss",
+      "category": "climate"
+    },
+    {
+      "id": 6,
+      "title": "Grist - Climate & Justice",
+      "url": "https://grist.org/feed/",
+      "category": "climate"
+    },
+    {
+      "id": 7,
+      "title": "Ars Technica",
+      "url": "https://feeds.arstechnica.com/arstechnica/index",
+      "category": "tech"
+    },
+    {
+      "id": 8,
+      "title": "Hacker News (Frontpage)",
+      "url": "https://hnrss.org/frontpage",
+      "category": "tech"
+    },
+    {
+      "id": 9,
+      "title": "The Verge",
+      "url": "https://www.theverge.com/rss/index.xml",
+      "category": "tech"
+    },
+    {
+      "id": 10,
+      "title": "Quanta Magazine",
+      "url": "https://api.quantamagazine.org/v1/feed/",
+      "category": "science"
+    },
+    {
+      "id": 11,
+      "title": "Nature - News & Comment",
+      "url": "https://www.nature.com/nature.rss",
+      "category": "science"
+    },
+    {
+      "id": 12,
+      "title": "ScienceDaily - Top Science",
+      "url": "https://www.sciencedaily.com/rss/top/science.xml",
+      "category": "science"
+    },
+    {
+      "id": 13,
+      "title": "CNA (Channel NewsAsia) - Singapore",
+      "url": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=10416",
+      "category": "singapore"
+    },
+    {
+      "id": 14,
+      "title": "The Straits Times - Singapore",
+      "url": "https://www.straitstimes.com/news/singapore/rss.xml",
+      "category": "singapore"
+    },
+    {
+      "id": 15,
+      "title": "Mothership.sg",
+      "url": "https://mothership.sg/feed/",
+      "category": "singapore"
+    }
+  ],
+  "recentLogs": [],
+  "articleStates": {}
+}
