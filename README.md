@@ -15,7 +15,6 @@ An adaptive RSS aggregator and personal news intelligence dashboard designed to 
 3. **Dynamic Persona that Learns Over Time**:
    - **Automatic Click & Read Tracking**: Clicking a headline or opening the source article automatically boosts the weights of that article's topics, category, and source in your SQLite persona profile.
    - **Explicit Feedback (`👍 More like this` / `👎 Less`)**: Upvoting or downvoting immediately adjusts topic weights and re-ranks all articles in real time.
-   - **Interactive Category & Topic Controls**: Drag the 5 category weight sliders (`0.5x` – `1.8x`), add/mute custom topics, edit your reader bio, or click **✨ Evolve** to let Gemini 3.8 Flash synthesize your recent reading log into an updated persona narrative.
 4. **Gemini 3.8 Flash Summarization & Executive Briefings**:
    - Built on the official `@google/genai` SDK (`ai.interactions.create` with structured JSON output schemas).
    - Generates 2–3 sentence high-signal summaries, 3 bullet takeaways, normalized topic tags, and a personalized `1–99%` relevance match score with an explanation badge.
