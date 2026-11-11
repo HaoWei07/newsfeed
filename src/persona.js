@@ -86,35 +86,34 @@ export function extractTopics(title = '', snippet = '', category = 'world', rawT
 }
 
 /**
- * Generates an extractive 2-3 sentence summary & bullet takeaways when AI hasn't run yet
+ * Generates a single consolidated extractive summary when AI hasn't run yet
  */
 export function generateExtractiveSummary(title = '', rawSnippet = '') {
   const cleanText = String(rawSnippet || '')
     .replace(/\s+/g, ' ')
     .trim();
 
-  if (!cleanText || cleanText.length < 40) {
+  if (!cleanText || cleanText.length < 30) {
     return {
       summary: `${title}. Click to read the full coverage from the original source.`,
-      takeaways: [title]
+      takeaways: []
     };
   }
 
   const sentences = cleanText
     .split(/(?<=[.!?])\s+/)
     .map(s => s.trim())
-    .filter(s => s.length > 25 && !/^(read more|continue reading|the post|appeared first on)/i.test(s));
+    .filter(s => s.length > 20 && !/^(read more|continue reading|the post|appeared first on)/i.test(s));
 
   if (sentences.length === 0) {
     return {
-      summary: cleanText.slice(0, 280) + (cleanText.length > 280 ? '...' : ''),
-      takeaways: [cleanText.slice(0, 140)]
+      summary: cleanText.slice(0, 320) + (cleanText.length > 320 ? '...' : ''),
+      takeaways: []
     };
   }
 
   const summary = sentences.slice(0, 2).join(' ');
-  const takeaways = sentences.slice(0, 3).map(s => (s.length > 140 ? s.slice(0, 137) + '...' : s));
-  return { summary, takeaways };
+  return { summary, takeaways: [] };
 }
 
 /**

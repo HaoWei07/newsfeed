@@ -41,26 +41,17 @@ export async function summarizeAndRankBatch(articlesBatch) {
   const likedTopics = sortedTopics.filter(([, w]) => w > 0).slice(0, 12).map(([k, w]) => `${k} (+${w})`);
   const dislikedTopics = sortedTopics.filter(([, w]) => w < 0).map(([k, w]) => `${k} (${w})`);
 
-  const depthInstruction =
-    persona.preferred_depth === 'concise'
-      ? 'Write ultra-crisp 1-2 sentence summaries and 2 short takeaways per article.'
-      : persona.preferred_depth === 'deep-technical'
-      ? 'Write analytical, technical 3-sentence summaries preserving numbers, mechanisms, and policy details, plus 3 insightful takeaways.'
-      : 'Write clear, high-signal 2-3 sentence summaries and 3 key bullet takeaways per article.';
-
   const systemInstruction = `You are an elite personal news editor and relevance-ranking engine.
 Your reader has the following evolving Persona:
 - Bio & Reading Profile: ${persona.bio_summary}
-- Preferred Summary Depth: ${persona.preferred_depth} (${depthInstruction})
 - High-Affinity Topics: ${likedTopics.join(', ') || 'General high-signal news'}
 - Muted/Disliked Topics: ${dislikedTopics.join(', ') || 'Clickbait, fluff'}
 
 For each article provided:
-1. Write a high-signal "ai_summary" (no filler phrases like "This article discusses").
-2. Extract 3 crisp "key_takeaways" (concrete facts, numbers, or implications).
-3. Assign 2 to 4 normalized "topics" tags (e.g. "AI & LLMs", "Singapore Policy", "Clean Energy", "Semiconductors", "Climate Science", "Geopolitics", "Space & Physics", "Biotech & Medicine", "ASEAN Economy", "Public Transport & Urban Planning").
-4. Score "relevance_score" from 1 to 99 reflecting how strongly this article matches the reader's persona.
-5. Write a concise 1-phrase "match_reason" (under 14 words) explaining why it is relevant (or less relevant) to this specific reader.`;
+1. Write a concise, high-signal 2-sentence "ai_summary" (no filler phrases like "This article discusses").
+2. Assign 2 to 4 normalized "topics" tags.
+3. Score "relevance_score" from 1 to 99 reflecting how strongly this article matches the reader's persona.
+4. Write a concise 1-phrase "match_reason" (under 14 words) explaining why it is relevant (or less relevant) to this specific reader.`;
 
   const payload = articlesBatch.map(a => ({
     id: a.id,
@@ -79,12 +70,7 @@ For each article provided:
           type: 'object',
           properties: {
             id: { type: 'integer', description: 'The exact article id from input.' },
-            ai_summary: { type: 'string', description: '2-3 sentence high-signal summary.' },
-            key_takeaways: {
-              type: 'array',
-              items: { type: 'string' },
-              description: '2-3 concise bullet points.'
-            },
+            ai_summary: { type: 'string', description: '2-sentence high-signal summary.' },
             topics: {
               type: 'array',
               items: { type: 'string' },
@@ -99,7 +85,7 @@ For each article provided:
               description: 'Short explanation of why this matches the reader persona.'
             }
           },
-          required: ['id', 'ai_summary', 'key_takeaways', 'topics', 'relevance_score', 'match_reason']
+          required: ['id', 'ai_summary', 'topics', 'relevance_score', 'match_reason']
         }
       }
     },

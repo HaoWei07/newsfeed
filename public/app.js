@@ -213,25 +213,25 @@ function extractTopicsClient(title = '', snippet = '', category = 'world') {
 
 function generateExtractiveSummaryClient(title = '', rawSnippet = '') {
   const cleanText = String(rawSnippet || '').replace(/\s+/g, ' ').trim();
-  if (!cleanText || cleanText.length < 40) {
+  if (!cleanText || cleanText.length < 30) {
     return {
       summary: `${title}. Tap to read full coverage from the original source.`,
-      takeaways: [title]
+      takeaways: []
     };
   }
   const sentences = cleanText
     .split(/(?<=[.!?])\s+/)
     .map(s => s.trim())
-    .filter(s => s.length > 25);
+    .filter(s => s.length > 20);
   if (sentences.length === 0) {
     return {
-      summary: cleanText.slice(0, 260),
-      takeaways: [cleanText.slice(0, 130)]
+      summary: cleanText.slice(0, 320),
+      takeaways: []
     };
   }
   return {
     summary: sentences.slice(0, 2).join(' '),
-    takeaways: sentences.slice(0, 3).map(s => (s.length > 140 ? s.slice(0, 137) + '...' : s))
+    takeaways: []
   };
 }
 
@@ -852,12 +852,6 @@ function renderArticles() {
       const score = article.relevance_score || 65;
       const scoreClass = score >= 80 ? 'score-high' : score >= 65 ? 'score-med' : 'score-low';
 
-      const takeawaysHtml = Array.isArray(article.key_takeaways) && article.key_takeaways.length > 0
-        ? `<ul class="takeaways-list">
-            ${article.key_takeaways.map(t => `<li>${escapeHtml(t)}</li>`).join('')}
-           </ul>`
-        : '';
-
       const topicsHtml = (article.topics || [])
         .map(topic => {
           const w = topicWeights[topic];
@@ -899,7 +893,6 @@ function renderArticles() {
 
           <div class="summary-container">
             <p class="summary-text">${escapeHtml(article.ai_summary || article.raw_snippet)}</p>
-            ${takeawaysHtml}
           </div>
 
           <div class="article-footer">
@@ -1146,17 +1139,89 @@ function openReaderModal(articleId) {
   document.getElementById('reader-meta').textContent = `${article.source_title} • ${formatRelativeTime(article.published_at)}`;
   document.getElementById('reader-title').textContent = article.title;
   document.getElementById('reader-match-banner').textContent = `${article.relevance_score}% Persona Match — ${article.match_reason || 'Matched to your reading profile'}`;
-  document.getElementById('reader-ai-summary').textContent = article.ai_summary || article.raw_snippet;
 
-  const takeawaysUl = document.getElementById('reader-takeaways');
-  takeawaysUl.innerHTML = (article.key_takeaways || [])
-    .map(t => `<li>${escapeHtml(t)}</li>`)
-    .join('');
+  const headingEl = document.getElementById('reader-summary-heading');
+  if (headingEl) {
+    headingEl.textContent = article.is_ai_ranked ? '✨ Gemini Summary' : 'Article Summary';
+  }
+  document.getElementById('reader-ai-summary').textContent =
+    article.ai_summary || article.raw_snippet || 'No summary provided by feed.';
 
-  document.getElementById('reader-raw-snippet').textContent = article.raw_snippet || 'No additional feed excerpt provided.';
+  const topicsContainer = document.getElementById('reader-topics');
+  if (topicsContainer) {
+    topicsContainer.innerHTML = (article.topics || [])
+      .map(t => `<span class="topic-chip">${escapeHtml(t)}</span>`)
+      .join('');
+  }
+
   document.getElementById('reader-original-link').href = article.url;
 
   modal.classList.remove('hidden');
+}
+
+function extractInteractionOutputText(data) {
+  if (typeof data?.output_text === 'string' && data.output_text) return data.output_text;
+  if (Array.isArray(data?.outputs)) {
+    const txt = data.outputs
+      .filter(o => o.type === 'text' && o.text)
+      .map(o => o.text)
+      .join('');
+    if (txt) return txt;
+  }
+  if (Array.isArray(data?.steps)) {
+    const parts = [];
+    for (const step of data.steps) {
+      if (step.type === 'model_output' && Array.isArray(step.content)) {
+        for (const item of step.content) {
+          if (item.type === 'text' && item.text) parts.push(item.text);
+        }
+      }
+    }
+    if (parts.length > 0) return parts.join('');
+  }
+  if (Array.isArray(data?.candidates)) {
+    const txt = data.candidates[0]?.content?.parts?.map(p => p.text || '').join('');
+    if (txt) return txt;
+  }
+  return '';
+}
+
+async function callGeminiInteractionsBrowser({ systemInstruction, input, schema }) {
+  const apiKey = (state.settings.rawApiKey || localStorage.getItem('pulse_gemini_key') || '').trim();
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY is not configured. Add it in Settings (⚙️).');
+  }
+  const model = state.settings.geminiModel || localStorage.getItem('pulse_gemini_model') || 'gemini-3.8-flash';
+
+  const res = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey
+    },
+    body: JSON.stringify({
+      model,
+      system_instruction: systemInstruction,
+      input: typeof input === 'string' ? input : JSON.stringify(input),
+      response_format: {
+        type: 'text',
+        mime_type: 'application/json',
+        schema
+      }
+    })
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const apiErrMsg = data?.error?.message || data?.message || `HTTP ${res.status}`;
+    throw new Error(apiErrMsg);
+  }
+
+  const textOut = extractInteractionOutputText(data);
+  if (!textOut) {
+    throw new Error('Empty response returned from Gemini.');
+  }
+  return JSON.parse(textOut);
 }
 
 function renderFeedsModalList() {
@@ -1290,98 +1355,117 @@ function bindGlobalListeners() {
     document.getElementById('modal-feeds').classList.remove('hidden');
   });
 
-  // AI Summarize & Rank button
+  // AI Summarize & Rank button (Desktop & Mobile)
   const btnAiRank = document.getElementById('btn-ai-rank');
-  btnAiRank.addEventListener('click', async () => {
+  const btnMobileAiRank = document.getElementById('btn-mobile-ai-rank');
+
+  async function triggerAiRank() {
     if (!state.settings.hasApiKey) {
-      document.getElementById('modal-settings').classList.remove('hidden');
+      openSettingsModal();
       showToast('Add your GEMINI_API_KEY first to run Gemini 3.8 Flash ranking & summarization');
       return;
     }
+    if (!state.articles || state.articles.length === 0) {
+      showToast('No articles in this category yet — tap Sync first!');
+      return;
+    }
+
     btnAiRank.disabled = true;
+    if (btnMobileAiRank) btnMobileAiRank.disabled = true;
     const origHtml = btnAiRank.innerHTML;
-    btnAiRank.textContent = '✨ Gemini Ranking...';
+    const origMobileText = btnMobileAiRank ? btnMobileAiRank.textContent : '✨ AI Rank';
+
     try {
-      const visibleIds = state.articles.slice(0, 8).map(a => a.id);
-      if (!state.isStaticMode) {
-        const res = await apiFetch('/api/ai/summarize-batch', {
-          method: 'POST',
-          body: JSON.stringify({ articleIds: visibleIds, category: state.activeCategory })
-        });
-        await loadArticles();
-        showToast(`✨ Gemini summarized & ranked ${res.processed} articles!`);
-      } else {
-        // Direct browser call to Gemini Interactions API for GitHub Pages!
-        const batch = state.articles.slice(0, 6).map(a => ({
-          id: a.id,
-          title: a.title,
-          source: a.source_title,
-          snippet: (a.raw_snippet || '').slice(0, 700)
-        }));
-        const res = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': state.settings.rawApiKey,
-            'Api-Revision': '2026-05-20'
-          },
-          body: JSON.stringify({
-            model: state.settings.geminiModel || 'gemini-3.8-flash',
-            system_instruction: `You are a personal news editor. Reader bio: ${state.persona.bio_summary}. Topic weights: ${JSON.stringify(state.persona.topic_weights)}. Summarize each article in 2 sentences, extract 3 bullet takeaways, 3 topics, a 1-99 relevance_score, and a short match_reason.`,
-            input: JSON.stringify(batch),
-            response_format: {
-              type: 'text',
-              mime_type: 'application/json',
-              schema: {
-                type: 'object',
-                properties: {
-                  results: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        id: { type: 'integer' },
-                        ai_summary: { type: 'string' },
-                        key_takeaways: { type: 'array', items: { type: 'string' } },
-                        topics: { type: 'array', items: { type: 'string' } },
-                        relevance_score: { type: 'integer' },
-                        match_reason: { type: 'string' }
-                      },
-                      required: ['id', 'ai_summary', 'key_takeaways', 'topics', 'relevance_score', 'match_reason']
-                    }
-                  }
-                },
-                required: ['results']
-              }
-            }
-          })
-        });
-        const data = await res.json();
-        const textOut = data.output_text || data.steps?.find(s => s.type === 'model_output')?.content?.[0]?.text || '{"results":[]}';
-        const parsed = JSON.parse(textOut);
-        for (const item of parsed.results || []) {
-          const target = state.allArticles.find(a => a.id === item.id);
-          if (target) {
-            target.ai_summary = item.ai_summary;
-            target.key_takeaways = item.key_takeaways;
-            target.topics = item.topics;
-            target.base_score = item.relevance_score;
-            target.relevance_score = item.relevance_score;
-            target.match_reason = item.match_reason;
-            target.is_ai_ranked = true;
-          }
+      // Target unranked articles in this category view first; if all are already AI-ranked, re-rank all of them
+      const unranked = state.articles.filter(a => !a.is_ai_ranked);
+      const targets = unranked.length > 0 ? unranked : state.articles;
+      const BATCH_SIZE = 10;
+      let totalProcessed = 0;
+
+      for (let i = 0; i < targets.length; i += BATCH_SIZE) {
+        const slice = targets.slice(i, i + BATCH_SIZE);
+        const progressLabel = `✨ Ranking ${Math.min(i + 1, targets.length)}–${Math.min(i + slice.length, targets.length)} of ${targets.length}...`;
+        btnAiRank.textContent = progressLabel;
+        if (btnMobileAiRank) {
+          btnMobileAiRank.textContent = `✨ ${Math.min(i + slice.length, targets.length)}/${targets.length}...`;
         }
-        recalculateStaticScores();
-        await loadArticles();
-        showToast(`✨ Gemini ranked ${(parsed.results || []).length} articles!`);
+
+        if (!state.isStaticMode) {
+          const res = await apiFetch('/api/ai/summarize-batch', {
+            method: 'POST',
+            body: JSON.stringify({
+              articleIds: slice.map(a => a.id),
+              category: state.activeCategory
+            })
+          });
+          totalProcessed += res.processed || slice.length;
+          await loadArticles();
+        } else {
+          const batchPayload = slice.map(a => ({
+            id: a.id,
+            title: a.title,
+            source: a.source_title,
+            snippet: (a.raw_snippet || '').slice(0, 750)
+          }));
+
+          const parsed = await callGeminiInteractionsBrowser({
+            systemInstruction: `You are an elite personal news editor. Reader bio: ${state.persona.bio_summary}. Topic weights: ${JSON.stringify(state.persona.topic_weights)}. For each article, write a concise 2-sentence high-signal "ai_summary" (no filler phrases), assign 2 to 4 normalized "topics" tags, score "relevance_score" (1-99) for this reader, and write a brief "match_reason" (under 14 words).`,
+            input: batchPayload,
+            schema: {
+              type: 'object',
+              properties: {
+                results: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer' },
+                      ai_summary: { type: 'string' },
+                      topics: { type: 'array', items: { type: 'string' } },
+                      relevance_score: { type: 'integer' },
+                      match_reason: { type: 'string' }
+                    },
+                    required: ['id', 'ai_summary', 'topics', 'relevance_score', 'match_reason']
+                  }
+                }
+              },
+              required: ['results']
+            }
+          });
+
+          for (const item of parsed.results || []) {
+            const target = state.allArticles.find(a => a.id === item.id);
+            if (target) {
+              target.ai_summary = item.ai_summary;
+              target.key_takeaways = [];
+              target.topics = item.topics;
+              target.base_score = item.relevance_score;
+              target.relevance_score = item.relevance_score;
+              target.match_reason = item.match_reason;
+              target.is_ai_ranked = true;
+              totalProcessed++;
+            }
+          }
+          recalculateStaticScores();
+          await loadArticles();
+        }
       }
+
+      showToast(`✨ Gemini summarized & ranked ${totalProcessed} articles in this category!`);
     } catch (err) {
       showToast(`Gemini Error: ${err.message}`);
     } finally {
       btnAiRank.disabled = false;
       btnAiRank.innerHTML = origHtml;
+      if (btnMobileAiRank) {
+        btnMobileAiRank.disabled = false;
+        btnMobileAiRank.textContent = origMobileText;
+      }
     }
-  });
+  }
+
+  btnAiRank.addEventListener('click', triggerAiRank);
+  btnMobileAiRank?.addEventListener('click', triggerAiRank);
 
   // Category Briefing button
   const btnBriefing = document.getElementById('btn-generate-briefing');
@@ -1395,6 +1479,38 @@ function bindGlobalListeners() {
           method: 'POST',
           body: JSON.stringify({ category: state.activeCategory })
         });
+      } else if (state.settings.hasApiKey && state.articles.length > 0) {
+        const top = state.articles.slice(0, 10).map(a => ({
+          title: a.title,
+          source: a.source_title,
+          summary: a.ai_summary || a.raw_snippet,
+          score: a.relevance_score
+        }));
+        const catName = state.categories.find(c => c.id === state.activeCategory)?.name || 'Your Feed';
+        briefing = await callGeminiInteractionsBrowser({
+          systemInstruction: `You are an executive news briefing writer for a reader with profile: ${state.persona.bio_summary}. Synthesize the top stories in ${catName} into a cohesive briefing.`,
+          input: top,
+          schema: {
+            type: 'object',
+            properties: {
+              headline: { type: 'string' },
+              synthesis: { type: 'string' },
+              themes: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    title: { type: 'string' },
+                    insight: { type: 'string' },
+                    score: { type: 'integer' }
+                  },
+                  required: ['title', 'insight', 'score']
+                }
+              }
+            },
+            required: ['headline', 'synthesis', 'themes']
+          }
+        });
       } else {
         const top = state.articles.slice(0, 4);
         briefing = {
@@ -1402,7 +1518,7 @@ function bindGlobalListeners() {
           synthesis: `Prioritized within this category based on your topic affinities and reading history.`,
           themes: top.map(a => ({
             title: a.title,
-            insight: a.ai_summary,
+            insight: a.ai_summary || a.raw_snippet,
             score: a.relevance_score
           }))
         };
@@ -1479,11 +1595,24 @@ function bindGlobalListeners() {
     showToast('Persona reset to default topic weights');
   });
 
+  function openSettingsModal() {
+    document.getElementById('select-gemini-model').value = state.settings.geminiModel || 'gemini-3.8-flash';
+    const repoInput = document.getElementById('input-gh-repo');
+    if (repoInput) repoInput.value = state.settings.ghRepo || localStorage.getItem('pulse_gh_repo') || 'HaoWei07/pulse-rss-reader';
+    const ghStatus = document.getElementById('current-gh-sync-status');
+    if (ghStatus) {
+      ghStatus.textContent = state.settings.ghToken
+        ? `Cloud Sync Active with ${repoInput?.value || 'GitHub'} (Persona & Feeds sync across PC & Mobile)`
+        : 'Not connected yet. Add token to sync Persona & Feeds automatically across devices.';
+    }
+    document.getElementById('modal-settings').classList.remove('hidden');
+  }
+
   // Evolve Persona with Gemini
   const btnEvolve = document.getElementById('btn-evolve-persona');
   btnEvolve.addEventListener('click', async () => {
     if (!state.settings.hasApiKey) {
-      document.getElementById('modal-settings').classList.remove('hidden');
+      openSettingsModal();
       showToast('Configure your GEMINI_API_KEY first to run AI Persona Synthesis');
       return;
     }
@@ -1497,7 +1626,53 @@ function bindGlobalListeners() {
         await loadArticles();
         showToast(`✨ ${res.evolution_insight}`);
       } else {
-        showToast('✨ Persona weights refined from your recent activity!');
+        const liked = state.allArticles.filter(a => a.feedback === 1).slice(0, 12).map(a => ({ title: a.title, topics: a.topics }));
+        const disliked = state.allArticles.filter(a => a.feedback === -1).slice(0, 12).map(a => ({ title: a.title, topics: a.topics }));
+        const clicked = state.allArticles.filter(a => a.click_count > 0).slice(0, 12).map(a => ({ title: a.title, topics: a.topics }));
+
+        const synth = await callGeminiInteractionsBrowser({
+          systemInstruction: 'You are an adaptive user-modeling AI. Refine the reader persona bio and suggest topic weight adjustments (-10 to +15) based on their recent clicks, upvotes, and downvotes.',
+          input: {
+            current_bio: state.persona.bio_summary,
+            current_topic_weights: state.persona.topic_weights,
+            liked_articles: liked,
+            disliked_articles: disliked,
+            clicked_articles: clicked,
+            recent_logs: (state.recentLogs || []).slice(0, 15)
+          },
+          schema: {
+            type: 'object',
+            properties: {
+              updated_bio_summary: { type: 'string' },
+              new_or_adjusted_topics: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    topic: { type: 'string' },
+                    weight: { type: 'number' }
+                  },
+                  required: ['topic', 'weight']
+                }
+              },
+              evolution_insight: { type: 'string' }
+            },
+            required: ['updated_bio_summary', 'new_or_adjusted_topics', 'evolution_insight']
+          }
+        });
+
+        if (synth.updated_bio_summary) {
+          state.persona.bio_summary = synth.updated_bio_summary;
+        }
+        for (const item of synth.new_or_adjusted_topics || []) {
+          if (item.topic && typeof item.weight === 'number') {
+            state.persona.topic_weights[item.topic] = Math.max(-10, Math.min(15, Number(item.weight.toFixed(1))));
+          }
+        }
+        recalculateStaticScores();
+        renderPersonaSidebar();
+        await loadArticles();
+        showToast(`✨ ${synth.evolution_insight || 'Persona evolved with Gemini!'}`);
       }
     } catch (err) {
       showToast(`Synthesis error: ${err.message}`);
@@ -1601,19 +1776,9 @@ function bindGlobalListeners() {
     }
   });
 
-  // Settings Modal
-  document.getElementById('btn-open-settings-modal').addEventListener('click', () => {
-    document.getElementById('select-gemini-model').value = state.settings.geminiModel || 'gemini-3.8-flash';
-    const repoInput = document.getElementById('input-gh-repo');
-    if (repoInput) repoInput.value = state.settings.ghRepo || localStorage.getItem('pulse_gh_repo') || 'HaoWei07/pulse-rss-reader';
-    const ghStatus = document.getElementById('current-gh-sync-status');
-    if (ghStatus) {
-      ghStatus.textContent = state.settings.ghToken
-        ? `Cloud Sync Active with ${repoInput?.value || 'GitHub'} (Persona & Feeds sync across PC & Mobile)`
-        : 'Not connected yet. Add token to sync Persona & Feeds automatically across devices.';
-    }
-    document.getElementById('modal-settings').classList.remove('hidden');
-  });
+  // Settings Modal (Desktop & Mobile)
+  document.getElementById('btn-open-settings-modal').addEventListener('click', openSettingsModal);
+  document.getElementById('btn-mobile-settings')?.addEventListener('click', openSettingsModal);
   document.getElementById('btn-close-settings-modal').addEventListener('click', () => {
     document.getElementById('modal-settings').classList.add('hidden');
   });

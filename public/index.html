@@ -26,8 +26,10 @@
       </div>
       <div class="mobile-actions">
         <button id="btn-mobile-sync" class="btn btn-secondary btn-sm" title="Sync RSS Feeds">↻ Sync</button>
+        <button id="btn-mobile-ai-rank" class="btn btn-accent btn-sm" title="Use Gemini to Summarize & Rank">✨ AI Rank</button>
         <button id="btn-mobile-feeds" class="btn btn-secondary btn-sm" title="Add/Manage Feeds">+ Feeds</button>
-        <button id="btn-mobile-persona" class="btn btn-accent btn-sm" title="Open Dynamic Persona">Persona</button>
+        <button id="btn-mobile-persona" class="btn btn-secondary btn-sm" title="Open Dynamic Persona">Persona</button>
+        <button id="btn-mobile-settings" class="btn btn-secondary btn-sm" title="Gemini API & Sync Settings">⚙️</button>
       </div>
     </div>
     <nav id="mobile-category-tabs" class="mobile-category-tabs">
@@ -245,14 +247,8 @@
         <h2 id="reader-title" class="reader-title"></h2>
         <div id="reader-match-banner" class="reader-match-banner"></div>
         <div class="reader-summary-box">
-          <h4>Executive Summary</h4>
+          <h4 id="reader-summary-heading">Article Summary</h4>
           <p id="reader-ai-summary"></p>
-          <h4>Key Takeaways</h4>
-          <ul id="reader-takeaways"></ul>
-        </div>
-        <div class="reader-raw-section">
-          <h4>Feed Excerpt</h4>
-          <p id="reader-raw-snippet"></p>
         </div>
         <div id="reader-topics" class="reader-topics"></div>
       </div>

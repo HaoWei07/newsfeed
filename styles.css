@@ -56,6 +56,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 10px;
 }
 
@@ -84,7 +86,8 @@ body {
 .mobile-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
 .mobile-category-tabs {
@@ -756,7 +759,7 @@ body {
   font-size: 13.8px;
   color: #e2e8f0;
   line-height: 1.58;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .takeaways-list {
