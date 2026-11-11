@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-11T10:48:25.847Z",
+  "updated_at": "2026-11-11T10:48:33.951Z",
   "persona": {
     "bio_summary": "Curious reader based in Singapore who follows global geopolitics, climate tech and clean energy policy, AI & software breakthroughs, fundamental science discoveries, and Singapore urban/economic developments. Prefers high-signal, analytical reporting over sensationalism or clickbait.",
     "preferred_depth": "balanced",
@@ -8,23 +8,19 @@
       "Geodesy & Geospatial Analytics": 6,
       "Clean Energy": 5,
       "Climate Science": 5,
-      "AI & LLMs": 5.5,
+      "AI & LLMs": 4.5,
       "Singapore Policy": 4,
-      "Geopolitics": 5,
+      "Geopolitics": 3,
       "Space & Physics": 3,
-      "Biotech & Medicine": 3.5,
+      "Biotech & Medicine": 2.5,
       "ASEAN Economy": 3.5,
       "Public Transport & Urban Planning": 3,
       "Celebrity Gossip": -5,
-      "Sponsored Content": -6,
-      "Semiconductor Technology": 1
+      "Sponsored Content": -6
     },
     "topic_keywords": {},
-    "source_weights": {
-      "Al Jazeera - All News": 0.4,
-      "BBC News - World": 0.4
-    },
-    "interactions_count": 2,
+    "source_weights": {},
+    "interactions_count": 0,
     "interactions_since_synthesis": 0
   },
   "feeds": [
