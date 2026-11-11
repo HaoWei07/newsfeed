@@ -339,8 +339,27 @@
             </select>
           </label>
 
-          <div class="modal-actions">
-            <button type="submit" class="btn btn-primary">Save Settings</button>
+          <hr style="border:none; border-top:1px solid var(--border-subtle); margin: 4px 0;" />
+
+          <div class="settings-help">
+            <strong>Cross-Device Sync (PC &harr; Mobile on GitHub Pages)</strong><br />
+            To automatically sync your <strong>Evolving Persona</strong> and <strong>Added RSS Feeds</strong> between your PC and Mobile without manual git commits, enter your GitHub repo (e.g. <code>HaoWei07/pulse-rss-reader</code>) and a GitHub Personal Access Token (with <em>Contents: Read &amp; Write</em> permission).
+          </div>
+
+          <label class="form-label">
+            <span>GitHub Repository (<code>owner/repo</code>)</span>
+            <input type="text" id="input-gh-repo" placeholder="HaoWei07/pulse-rss-reader" autocomplete="off" />
+          </label>
+
+          <label class="form-label">
+            <span>GitHub Personal Access Token (for Cloud Sync)</span>
+            <input type="password" id="input-gh-token" placeholder="github_pat_... or ghp_..." autocomplete="off" />
+            <small id="current-gh-sync-status" class="form-hint"></small>
+          </label>
+
+          <div class="modal-actions" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <button type="button" id="btn-force-cloud-pull" class="btn btn-secondary">Pull from GitHub</button>
+            <button type="submit" class="btn btn-primary">Save Settings & Sync</button>
           </div>
         </form>
       </div>

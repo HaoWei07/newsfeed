@@ -527,12 +527,149 @@ function scoreArticleClient(article, persona) {
   return { relevance_score: finalScore, match_reason: matchReason };
 }
 
-function saveStaticState() {
+let cloudSyncTimer = null;
+
+function saveStaticState(triggerCloudPush = true) {
   if (!state.isStaticMode) return;
   localStorage.setItem('pulse_persona_v2', JSON.stringify(state.persona));
   localStorage.setItem('pulse_feeds_v2', JSON.stringify(state.feeds));
   localStorage.setItem('pulse_articles_v2', JSON.stringify(state.allArticles));
   localStorage.setItem('pulse_logs_v2', JSON.stringify(state.recentLogs));
+
+  if (triggerCloudPush && state.settings.ghToken && state.settings.ghRepo) {
+    clearTimeout(cloudSyncTimer);
+    cloudSyncTimer = setTimeout(() => {
+      pushStateToGitHubCloud().catch(err => console.warn('Cloud sync push warning:', err.message));
+    }, 1200);
+  }
+}
+
+async function pullStateFromGitHubCloud(showFeedback = false) {
+  const repo = state.settings.ghRepo || localStorage.getItem('pulse_gh_repo') || 'HaoWei07/pulse-rss-reader';
+  const token = state.settings.ghToken || localStorage.getItem('pulse_gh_token') || '';
+  if (!repo) return false;
+
+  const headers = { Accept: 'application/vnd.github+json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`https://api.github.com/repos/${repo}/contents/cloud-sync.json`, {
+    headers,
+    cache: 'no-store'
+  });
+  if (!res.ok) {
+    if (showFeedback) showToast('No cloud-sync.json found on GitHub yet — saving current state now.');
+    return false;
+  }
+  const fileData = await res.json();
+  state.cloudSyncSha = fileData.sha;
+  const decoded = decodeURIComponent(escape(atob(fileData.content.replace(/\s/g, ''))));
+  const payload = JSON.parse(decoded);
+
+  if (payload.persona) state.persona = payload.persona;
+  if (Array.isArray(payload.feeds) && payload.feeds.length > 0) {
+    state.feeds = mergeWithDefaultFeeds(payload.feeds);
+  }
+  if (Array.isArray(payload.recentLogs)) state.recentLogs = payload.recentLogs;
+
+  // Apply bookmarked / feedback / read flags from cloud onto articles by guid
+  if (payload.articleStates && typeof payload.articleStates === 'object') {
+    for (const art of state.allArticles) {
+      const st = payload.articleStates[art.guid];
+      if (st) {
+        art.is_read = Boolean(st.is_read);
+        art.feedback = st.feedback || 0;
+        art.bookmarked = Boolean(st.bookmarked);
+        art.click_count = st.click_count || 0;
+      }
+    }
+  }
+
+  saveStaticState(false);
+  recalculateStaticScores();
+  renderNavigation();
+  renderPersonaSidebar();
+  await loadArticles();
+  if (showFeedback) showToast('Pulled latest Persona & RSS Feeds from GitHub!');
+  return true;
+}
+
+async function pushStateToGitHubCloud(showFeedback = false) {
+  const repo = state.settings.ghRepo || localStorage.getItem('pulse_gh_repo') || '';
+  const token = state.settings.ghToken || localStorage.getItem('pulse_gh_token') || '';
+  if (!repo || !token) return;
+
+  const headers = {
+    Accept: 'application/vnd.github+json',
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+
+  // Get current file SHA if needed
+  let sha = state.cloudSyncSha;
+  if (!sha) {
+    const check = await fetch(`https://api.github.com/repos/${repo}/contents/cloud-sync.json`, {
+      headers,
+      cache: 'no-store'
+    });
+    if (check.ok) {
+      const checkJson = await check.json();
+      sha = checkJson.sha;
+    }
+  }
+
+  const articleStates = {};
+  for (const a of state.allArticles) {
+    if (a.is_read || a.feedback !== 0 || a.bookmarked || a.click_count > 0) {
+      articleStates[a.guid] = {
+        is_read: a.is_read,
+        feedback: a.feedback,
+        bookmarked: a.bookmarked,
+        click_count: a.click_count
+      };
+    }
+  }
+
+  const syncPayload = {
+    updated_at: new Date().toISOString(),
+    persona: state.persona,
+    feeds: state.feeds,
+    recentLogs: (state.recentLogs || []).slice(0, 20),
+    articleStates
+  };
+
+  const base64Content = btoa(unescape(encodeURIComponent(JSON.stringify(syncPayload, null, 2))));
+  const body = {
+    message: 'Sync Pulse RSS feeds & evolving persona',
+    content: base64Content
+  };
+  if (sha) body.sha = sha;
+
+  const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/cloud-sync.json`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(body)
+  });
+
+  if (!putRes.ok) {
+    const errData = await putRes.json().catch(() => ({}));
+    throw new Error(errData.message || `GitHub sync failed (${putRes.status})`);
+  }
+  const putJson = await putRes.json();
+  state.cloudSyncSha = putJson.content?.sha || sha;
+  if (showFeedback) showToast('Synced Persona & Feeds to GitHub!');
+}
+
+function mergeWithDefaultFeeds(storedFeeds) {
+  if (!Array.isArray(storedFeeds) || storedFeeds.length === 0) {
+    return structuredClone(DEFAULT_FEEDS);
+  }
+  const merged = [...storedFeeds];
+  for (const def of DEFAULT_FEEDS) {
+    if (!merged.some(f => f.url === def.url)) {
+      merged.push({ ...def });
+    }
+  }
+  return merged;
 }
 
 function recalculateStaticScores() {
@@ -643,18 +780,25 @@ async function initAppModeAndState() {
     state.isStaticMode = true;
     state.categories = DEFAULT_CATEGORIES;
     state.persona = JSON.parse(localStorage.getItem('pulse_persona_v2') || 'null') || structuredClone(DEFAULT_PERSONA);
-    state.feeds = JSON.parse(localStorage.getItem('pulse_feeds_v2') || 'null') || structuredClone(DEFAULT_FEEDS);
+    const storedFeeds = JSON.parse(localStorage.getItem('pulse_feeds_v2') || 'null');
+    state.feeds = mergeWithDefaultFeeds(storedFeeds);
     state.allArticles = JSON.parse(localStorage.getItem('pulse_articles_v2') || 'null') || getInitialSeedArticles();
     state.recentLogs = JSON.parse(localStorage.getItem('pulse_logs_v2') || '[]');
     const savedKey = localStorage.getItem('pulse_gemini_key') || '';
     const savedModel = localStorage.getItem('pulse_gemini_model') || 'gemini-3.8-flash';
+    const ghRepo = localStorage.getItem('pulse_gh_repo') || 'HaoWei07/pulse-rss-reader';
+    const ghToken = localStorage.getItem('pulse_gh_token') || '';
     state.settings = {
       hasApiKey: Boolean(savedKey),
       maskedApiKey: savedKey ? `${savedKey.slice(0, 4)}...${savedKey.slice(-4)}` : '',
       geminiModel: savedModel,
-      rawApiKey: savedKey
+      rawApiKey: savedKey,
+      ghRepo,
+      ghToken
     };
     recalculateStaticScores();
+    // Automatically pull latest shared Persona & Feeds from GitHub repo if available
+    pullStateFromGitHubCloud(false).catch(() => {});
   }
 
   renderNavigation();
@@ -1564,17 +1708,40 @@ function bindGlobalListeners() {
   // Settings Modal
   document.getElementById('btn-open-settings-modal').addEventListener('click', () => {
     document.getElementById('select-gemini-model').value = state.settings.geminiModel || 'gemini-3.8-flash';
+    const repoInput = document.getElementById('input-gh-repo');
+    if (repoInput) repoInput.value = state.settings.ghRepo || localStorage.getItem('pulse_gh_repo') || 'HaoWei07/pulse-rss-reader';
+    const ghStatus = document.getElementById('current-gh-sync-status');
+    if (ghStatus) {
+      ghStatus.textContent = state.settings.ghToken
+        ? `Cloud Sync Active with ${repoInput?.value || 'GitHub'} (Persona & Feeds sync across PC & Mobile)`
+        : 'Not connected yet. Add token to sync Persona & Feeds automatically across devices.';
+    }
     document.getElementById('modal-settings').classList.remove('hidden');
   });
   document.getElementById('btn-close-settings-modal').addEventListener('click', () => {
     document.getElementById('modal-settings').classList.add('hidden');
   });
 
+  document.getElementById('btn-force-cloud-pull')?.addEventListener('click', async () => {
+    try {
+      await pullStateFromGitHubCloud(true);
+    } catch (err) {
+      showToast(`Pull error: ${err.message}`);
+    }
+  });
+
   document.getElementById('form-settings').addEventListener('submit', async e => {
     e.preventDefault();
     const apiKeyInput = document.getElementById('input-api-key');
     const modelSelect = document.getElementById('select-gemini-model');
+    const ghRepoInput = document.getElementById('input-gh-repo');
+    const ghTokenInput = document.getElementById('input-gh-token');
     const keyVal = apiKeyInput.value.trim();
+    const repoVal = ghRepoInput ? ghRepoInput.value.trim() : '';
+    const tokenVal = ghTokenInput ? ghTokenInput.value.trim() : '';
+
+    if (repoVal) localStorage.setItem('pulse_gh_repo', repoVal);
+    if (tokenVal) localStorage.setItem('pulse_gh_token', tokenVal);
 
     if (!state.isStaticMode) {
       const payload = { geminiModel: modelSelect.value };
@@ -1588,18 +1755,26 @@ function bindGlobalListeners() {
       if (keyVal) localStorage.setItem('pulse_gemini_key', keyVal);
       localStorage.setItem('pulse_gemini_model', modelSelect.value);
       const savedKey = localStorage.getItem('pulse_gemini_key') || '';
+      const savedRepo = localStorage.getItem('pulse_gh_repo') || 'HaoWei07/pulse-rss-reader';
+      const savedToken = localStorage.getItem('pulse_gh_token') || '';
       state.settings = {
         hasApiKey: Boolean(savedKey),
         maskedApiKey: savedKey ? `${savedKey.slice(0, 4)}...${savedKey.slice(-4)}` : '',
         geminiModel: modelSelect.value,
-        rawApiKey: savedKey
+        rawApiKey: savedKey,
+        ghRepo: savedRepo,
+        ghToken: savedToken
       };
+      if (savedRepo && savedToken) {
+        await pushStateToGitHubCloud(true).catch(err => showToast(`GitHub Sync: ${err.message}`));
+      }
     }
 
     apiKeyInput.value = '';
+    if (ghTokenInput) ghTokenInput.value = '';
     updateApiStatusIndicator();
     document.getElementById('modal-settings').classList.add('hidden');
-    showToast(`Saved Gemini settings (${state.settings.geminiModel})`);
+    showToast(`Saved settings (${state.settings.geminiModel})`);
   });
 }
 
