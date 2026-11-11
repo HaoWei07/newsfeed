@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-11T10:48:33.951Z",
+  "updated_at": "2026-11-11T10:48:36.344Z",
   "persona": {
     "bio_summary": "Curious reader based in Singapore who follows global geopolitics, climate tech and clean energy policy, AI & software breakthroughs, fundamental science discoveries, and Singapore urban/economic developments. Prefers high-signal, analytical reporting over sensationalism or clickbait.",
     "preferred_depth": "balanced",
@@ -8,7 +8,7 @@
       "Geodesy & Geospatial Analytics": 6,
       "Clean Energy": 5,
       "Climate Science": 5,
-      "AI & LLMs": 4.5,
+      "AI & LLMs": 5.5,
       "Singapore Policy": 4,
       "Geopolitics": 3,
       "Space & Physics": 3,
@@ -19,8 +19,10 @@
       "Sponsored Content": -6
     },
     "topic_keywords": {},
-    "source_weights": {},
-    "interactions_count": 0,
+    "source_weights": {
+      "Al Jazeera - All News": 0.4
+    },
+    "interactions_count": 1,
     "interactions_since_synthesis": 0
   },
   "feeds": [
@@ -213,6 +215,12 @@
   ],
   "recentLogs": [
     {
+      "article_title": "Chinese university buys Nvidia AI H200 chips despite US ban, records show",
+      "action": "click",
+      "delta_summary": "Read article: AI & LLMs (+1)",
+      "created_at": "2026-11-11T10:48:34.683Z"
+    },
+    {
       "article_title": "US warns Madagascar over growing military ties with Russia",
       "action": "click",
       "delta_summary": "Read article: Biotech & Medicine (+1), Geopolitics (+1)",
@@ -308,7 +316,7 @@
       "is_read": true,
       "feedback": 0,
       "bookmarked": false,
-      "click_count": 1
+      "click_count": 2
     }
   }
 }
