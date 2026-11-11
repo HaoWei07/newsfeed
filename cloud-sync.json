@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-11T09:47:42.389Z",
+  "updated_at": "2026-11-11T09:48:23.719Z",
   "persona": {
     "bio_summary": "Curious reader based in Singapore who follows global geopolitics, climate tech and clean energy policy, AI & software breakthroughs, fundamental science discoveries, and Singapore urban/economic developments. Prefers high-signal, analytical reporting over sensationalism or clickbait.",
     "preferred_depth": "balanced",
@@ -116,5 +116,12 @@
     }
   ],
   "recentLogs": [],
-  "articleStates": {}
+  "articleStates": {
+    "https://www.bbc.co.uk/news/articles/crkgv58pknyeo#1": {
+      "is_read": true,
+      "feedback": 0,
+      "bookmarked": false,
+      "click_count": 1
+    }
+  }
 }
