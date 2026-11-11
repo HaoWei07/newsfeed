@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-11T09:45:46.964Z",
+  "updated_at": "2026-11-11T09:45:50.884Z",
   "persona": {
     "bio_summary": "Curious reader based in Singapore who follows global geopolitics, climate tech and clean energy policy, AI & software breakthroughs, fundamental science discoveries, and Singapore urban/economic developments. Prefers high-signal, analytical reporting over sensationalism or clickbait.",
     "preferred_depth": "balanced",
@@ -16,7 +16,8 @@
       "ASEAN Economy": 3.5,
       "Public Transport & Urban Planning": 3,
       "Celebrity Gossip": -5,
-      "Sponsored Content": -6
+      "Sponsored Content": -6,
+      "nuclear energy": 5
     },
     "topic_keywords": {},
     "source_weights": {},
