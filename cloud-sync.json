@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-11T09:49:38.882Z",
+  "updated_at": "2026-11-11T09:56:48.261Z",
   "persona": {
     "bio_summary": "Curious reader based in Singapore who follows global geopolitics, climate tech and clean energy policy, AI & software breakthroughs, fundamental science discoveries, and Singapore urban/economic developments. Prefers high-signal, analytical reporting over sensationalism or clickbait.",
     "preferred_depth": "balanced",
@@ -113,6 +113,102 @@
       "title": "Mothership.sg",
       "url": "https://mothership.sg/feed/",
       "category": "singapore"
+    },
+    {
+      "id": 1794391007041,
+      "title": "World news | The Guardian",
+      "url": "https://feeds.theguardian.com/theguardian/world/rss",
+      "category": "world"
+    },
+    {
+      "id": 1794391007042,
+      "title": "\"site:reuters.com\" - Google News",
+      "url": "https://news.google.com/rss/search?q=site%3Areuters.com&hl=en-US&gl=US&ceid=US%3Aen",
+      "category": "world"
+    },
+    {
+      "id": 1794391007044,
+      "title": "RSS Breaking News - World",
+      "url": "https://www.straitstimes.com/news/world/rss.xml",
+      "category": "singapore"
+    },
+    {
+      "id": 1794391007045,
+      "title": "Inside Climate News",
+      "url": "https://insideclimatenews.org/feed/",
+      "category": "climate"
+    },
+    {
+      "id": 1794391007046,
+      "title": "The Carbon Brief",
+      "url": "https://www.carbonbrief.org/feed",
+      "category": "climate"
+    },
+    {
+      "id": 1794391007047,
+      "title": "Earth & Climate News -- ScienceDaily",
+      "url": "https://www.sciencedaily.com/rss/earth_climate.xml",
+      "category": "climate"
+    },
+    {
+      "id": 1794391007048,
+      "title": "Mongabay.com News",
+      "url": "https://news.mongabay.com/feed/",
+      "category": "climate"
+    },
+    {
+      "id": 1794391007049,
+      "title": "Nature Climate Change - Issue - nature.com science feed",
+      "url": "https://www.nature.com/nclimate.rss",
+      "category": "climate"
+    },
+    {
+      "id": 1794391007050,
+      "title": "News – edie",
+      "url": "https://www.edie.net/content/news/feed/",
+      "category": "climate"
+    },
+    {
+      "id": 1794391007051,
+      "title": "New Scientist - Climate Change",
+      "url": "https://www.newscientist.com/feed/",
+      "category": "climate"
+    },
+    {
+      "id": 1794391007052,
+      "title": "Earth News - Earth Science News, Earth Science, Climate Change",
+      "url": "https://phys.org/rss-feed/earth-news/",
+      "category": "climate"
+    },
+    {
+      "id": 1794391007053,
+      "title": "Environment | The Guardian",
+      "url": "https://feeds.guardian.co.uk/theguardian/environment/rss",
+      "category": "climate"
+    },
+    {
+      "id": 1794391007054,
+      "title": "Latest Science News -- ScienceDaily",
+      "url": "https://www.sciencedaily.com/newsfeed.xml",
+      "category": "science"
+    },
+    {
+      "id": 1794391007055,
+      "title": "Breaking Science News | Sci-News.com",
+      "url": "https://www.sci.news/feed",
+      "category": "science"
+    },
+    {
+      "id": 1794391007056,
+      "title": "Technology | The Guardian",
+      "url": "https://feeds.guardian.co.uk/theguardian/technology/rss",
+      "category": "tech"
+    },
+    {
+      "id": 1794391007057,
+      "title": "Artificial intelligence (AI) | The Guardian",
+      "url": "https://www.theguardian.com/technology/artificialintelligenceai/rss",
+      "category": "tech"
     }
   ],
   "recentLogs": [
