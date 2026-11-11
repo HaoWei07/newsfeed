@@ -172,6 +172,7 @@ export const DEFAULT_PERSONA = {
     'Celebrity Gossip': -5.0,
     'Sponsored Content': -6.0
   },
+  topic_keywords: {},
   source_weights: {},
   interactions_count: 0,
   interactions_since_synthesis: 0,
@@ -261,19 +262,28 @@ export function initDb() {
     }
   }
 
+  // Ensure topic_keywords column exists for existing DBs
+  try {
+    db.exec("ALTER TABLE persona ADD COLUMN topic_keywords TEXT DEFAULT '{}'");
+  } catch {}
+
+  // Remove any legacy placeholder seed articles
+  db.exec("DELETE FROM articles WHERE guid LIKE 'seed-%'");
+
   // Seed default persona if not present
   const personaRow = db.prepare('SELECT id FROM persona WHERE id = 1').get();
   if (!personaRow) {
     db.prepare(`
       INSERT INTO persona (
-        id, bio_summary, preferred_depth, category_weights, topic_weights, source_weights,
+        id, bio_summary, preferred_depth, category_weights, topic_weights, topic_keywords, source_weights,
         interactions_count, interactions_since_synthesis, last_updated_at
-      ) VALUES (1, ?, ?, ?, ?, ?, 0, 0, ?)
+      ) VALUES (1, ?, ?, ?, ?, ?, ?, 0, 0, ?)
     `).run(
       DEFAULT_PERSONA.bio_summary,
-      DEFAULT_PERSONA.preferred_depth,
-      JSON.stringify(DEFAULT_PERSONA.category_weights),
+      'balanced',
+      '{}',
       JSON.stringify(DEFAULT_PERSONA.topic_weights),
+      JSON.stringify(DEFAULT_PERSONA.topic_keywords),
       JSON.stringify(DEFAULT_PERSONA.source_weights),
       DEFAULT_PERSONA.last_updated_at
     );
@@ -297,9 +307,9 @@ export function getPersona() {
   if (!row) return { ...DEFAULT_PERSONA };
   return {
     bio_summary: row.bio_summary,
-    preferred_depth: row.preferred_depth || 'balanced',
-    category_weights: JSON.parse(row.category_weights || '{}'),
+    preferred_depth: 'balanced',
     topic_weights: JSON.parse(row.topic_weights || '{}'),
+    topic_keywords: JSON.parse(row.topic_keywords || '{}'),
     source_weights: JSON.parse(row.source_weights || '{}'),
     interactions_count: row.interactions_count || 0,
     interactions_since_synthesis: row.interactions_since_synthesis || 0,
@@ -313,8 +323,8 @@ export function savePersona(persona) {
     UPDATE persona SET
       bio_summary = ?,
       preferred_depth = ?,
-      category_weights = ?,
       topic_weights = ?,
+      topic_keywords = ?,
       source_weights = ?,
       interactions_count = ?,
       interactions_since_synthesis = ?,
@@ -322,9 +332,9 @@ export function savePersona(persona) {
     WHERE id = 1
   `).run(
     persona.bio_summary,
-    persona.preferred_depth || 'balanced',
-    JSON.stringify(persona.category_weights || {}),
+    'balanced',
     JSON.stringify(persona.topic_weights || {}),
+    JSON.stringify(persona.topic_keywords || {}),
     JSON.stringify(persona.source_weights || {}),
     persona.interactions_count || 0,
     persona.interactions_since_synthesis || 0,

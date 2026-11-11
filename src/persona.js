@@ -18,26 +18,41 @@ export const TOPIC_TAXONOMY = [
   { tag: 'ASEAN Economy', keywords: ['asean', 'johor', 'js-sez', 'malaysia', 'indonesia', 'vietnam', 'southeast asia', 'strait of malacca', 'regional hub'] }
 ];
 
+function matchesKeyword(textLower, kw) {
+  const cleanKw = String(kw || '').trim().toLowerCase();
+  if (!cleanKw) return false;
+  if (cleanKw.length <= 3) {
+    return new RegExp(`\\b${cleanKw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(textLower);
+  }
+  return textLower.includes(cleanKw);
+}
+
 /**
- * Extracts 2-4 clean topic tags from title, snippet, category, and raw RSS categories
+ * Extracts 2-4 clean topic tags from title, snippet, category, raw RSS categories, and user-defined topic_keywords
  */
-export function extractTopics(title = '', snippet = '', category = 'world', rawTags = []) {
+export function extractTopics(title = '', snippet = '', category = 'world', rawTags = [], customTopicKeywords = {}, customTopicWeights = {}) {
   const combined = `${title} ${snippet} ${(rawTags || []).join(' ')}`.toLowerCase();
   const matched = new Set();
 
   for (const item of TOPIC_TAXONOMY) {
     for (const kw of item.keywords) {
-      // Match whole word for short keywords (<= 3 chars), substring for longer
-      if (kw.length <= 3) {
-        const regex = new RegExp(`\\b${kw}\\b`, 'i');
-        if (regex.test(combined)) {
-          matched.add(item.tag);
-          break;
-        }
-      } else if (combined.includes(kw)) {
+      if (matchesKeyword(combined, kw)) {
         matched.add(item.tag);
         break;
       }
+    }
+  }
+
+  // Also check user-defined custom topic keywords & custom topic names
+  for (const [topic, kwList] of Object.entries(customTopicKeywords || {})) {
+    const terms = [topic, ...(Array.isArray(kwList) ? kwList : [])];
+    if (terms.some(kw => matchesKeyword(combined, kw))) {
+      matched.add(topic);
+    }
+  }
+  for (const topic of Object.keys(customTopicWeights || {})) {
+    if (matchesKeyword(combined, topic)) {
+      matched.add(topic);
     }
   }
 
@@ -139,12 +154,15 @@ export function scoreArticleWithPersona(article, persona) {
     }
   }
 
-  // Also scan title + snippet against user's custom topic_weights keys
+  // Also scan title + snippet against user's custom topic_weights keys and topic_keywords
   const textLower = `${article.title || ''} ${article.raw_snippet || ''}`.toLowerCase();
+  const customKeywords = persona.topic_keywords || {};
   for (const [topicKey, weight] of Object.entries(topicWeights)) {
     if (topics.some(t => t.toLowerCase() === topicKey.toLowerCase())) continue;
-    if (topicKey.length >= 3 && textLower.includes(topicKey.toLowerCase())) {
-      topicDelta += weight * 1.4;
+    const kwList = Array.isArray(customKeywords[topicKey]) ? customKeywords[topicKey] : [];
+    const terms = [topicKey, ...kwList];
+    if (terms.some(term => term.length >= 2 && matchesKeyword(textLower, term))) {
+      topicDelta += weight * 1.6;
       if (weight >= 1.5) matchedLikedTopics.push({ topic: topicKey, weight });
       if (weight <= -1.5) matchedDislikedTopics.push({ topic: topicKey, weight });
     }

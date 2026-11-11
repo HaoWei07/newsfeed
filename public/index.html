@@ -193,14 +193,6 @@
             <button id="btn-save-bio" class="btn-link">Save edit</button>
           </div>
           <textarea id="persona-bio-input" rows="4" class="persona-bio-textarea" placeholder="Describe your interests, role, and what kind of stories matter most to you..."></textarea>
-          <div class="depth-row">
-            <span class="depth-label">Summary style:</span>
-            <div class="depth-pills" id="depth-pills">
-              <button data-depth="concise" class="depth-pill">Concise</button>
-              <button data-depth="balanced" class="depth-pill active">Balanced</button>
-              <button data-depth="deep-technical" class="depth-pill">Deep Technical</button>
-            </div>
-          </div>
         </div>
 
         <!-- 2. Learned Topic Affinities (Used to rank within each category) -->
@@ -210,13 +202,16 @@
             <button id="btn-reset-persona" class="btn-link-danger" title="Reset persona to default weights">Reset</button>
           </div>
           <form id="form-add-topic" class="add-topic-form">
-            <input type="text" id="input-new-topic" placeholder="Add topic (e.g. Quantum, HDB, Solar)..." required />
-            <select id="select-new-topic-weight">
-              <option value="5">+5 Boost</option>
-              <option value="3">+3 Like</option>
-              <option value="-5">-5 Mute</option>
-            </select>
-            <button type="submit" class="btn btn-secondary btn-sm">Add</button>
+            <div class="add-topic-row">
+              <input type="text" id="input-new-topic" placeholder="Topic (e.g. Nuclear Energy)..." required />
+              <select id="select-new-topic-weight">
+                <option value="5">+5 Boost</option>
+                <option value="3">+3 Like</option>
+                <option value="-5">-5 Mute</option>
+              </select>
+              <button type="submit" class="btn btn-secondary btn-sm">Add</button>
+            </div>
+            <input type="text" id="input-new-topic-keywords" class="add-topic-keywords-input" placeholder="Optional keywords (e.g. nuclear, reactor, smr, uranium)" />
           </form>
 
           <div class="topic-group-label">Prioritized Topics (Boosts Rank)</div>

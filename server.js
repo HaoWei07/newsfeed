@@ -18,8 +18,7 @@ import {
 import {
   syncAllFeeds,
   fetchSingleFeed,
-  importOpmlFeeds,
-  seedInitialArticlesIfEmpty
+  importOpmlFeeds
 } from './src/rss.js';
 import {
   getApiKey,
@@ -32,7 +31,6 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 initDb();
-seedInitialArticlesIfEmpty();
 recalculateAllArticleScores();
 
 const app = express();
@@ -208,9 +206,9 @@ app.put('/api/persona', (req, res) => {
     const updated = {
       ...current,
       bio_summary: req.body.bio_summary ?? current.bio_summary,
-      preferred_depth: req.body.preferred_depth ?? current.preferred_depth,
-      category_weights: req.body.category_weights ?? current.category_weights,
+      preferred_depth: 'balanced',
       topic_weights: req.body.topic_weights ?? current.topic_weights,
+      topic_keywords: req.body.topic_keywords ?? current.topic_keywords,
       source_weights: req.body.source_weights ?? current.source_weights
     };
 

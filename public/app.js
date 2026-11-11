@@ -81,6 +81,7 @@ const DEFAULT_PERSONA = {
     'Celebrity Gossip': -5.0,
     'Sponsored Content': -6.0
   },
+  topic_keywords: {},
   source_weights: {},
   interactions_count: 0,
   interactions_since_synthesis: 0
@@ -102,244 +103,6 @@ const TOPIC_TAXONOMY = [
   { tag: 'Public Transport & Urban Planning', keywords: ['mrt', 'lta', 'bus', 'changi', 'bto', 'urban', 'tuas', 'jurong', 'cross island line', 'thomson-east coast', 'coe', 'erp', 'housing'] },
   { tag: 'ASEAN Economy', keywords: ['asean', 'johor', 'js-sez', 'malaysia', 'indonesia', 'vietnam', 'southeast asia', 'strait of malacca', 'regional hub'] }
 ];
-
-function getInitialSeedArticles() {
-  const now = Date.now();
-  const hoursAgo = h => new Date(now - h * 3600 * 1000).toISOString();
-  return [
-    {
-      id: 101,
-      guid: 'seed-world-1',
-      category: 'world',
-      source_title: 'BBC News - World',
-      title: 'ASEAN and EU Sign Digital Trade & Green Corridor Pact to Harmonize Cross-Border Supply Chains',
-      url: 'https://www.bbc.com/news/world',
-      published_at: hoursAgo(2.2),
-      raw_snippet: 'Trade ministers from ASEAN and the European Union finalized a landmark framework covering mutual recognition of electronic trade documents, carbon-accounting interoperability, and critical mineral supply chain resilience, with Singapore and Vietnam serving as initial digital clearing hubs.',
-      ai_summary: 'ASEAN and the EU signed a Digital Trade and Green Corridor agreement standardizing paperless customs, carbon-footprint verification, and critical mineral supply chains, with Singapore and Vietnam acting as primary clearing hubs.',
-      key_takeaways: [
-        'Harmonizes electronic invoicing and customs clearing between ASEAN and the EU.',
-        'Establishes mutual recognition for industrial carbon accounting to ease CBAM compliance.',
-        'Designates Singapore and Vietnam as initial digital trade clearing nodes.'
-      ],
-      topics: ['Geopolitics', 'ASEAN Economy', 'Global Economy', 'Singapore Policy'],
-      is_read: false,
-      feedback: 0,
-      bookmarked: false,
-      click_count: 0
-    },
-    {
-      id: 102,
-      guid: 'seed-world-2',
-      category: 'world',
-      source_title: 'The Guardian - World News',
-      title: 'Central Banks Coordinate Instant Cross-Border Wholesale Settlement Network Across 12 Currencies',
-      url: 'https://www.theguardian.com/world',
-      published_at: hoursAgo(5.4),
-      raw_snippet: 'The Bank for International Settlements (BIS) Innovation Hub and participating central banks—including the Monetary Authority of Singapore, ECB, and Bank of England—completed live wholesale settlement trials reducing international treasury clearing from two days to under four seconds.',
-      ai_summary: 'A coalition of 12 central banks including MAS and the ECB completed live multi-currency wholesale settlement trials, cutting cross-border institutional FX clearing times from 48 hours to under 4 seconds.',
-      key_takeaways: [
-        'Reduces cross-border wholesale FX settlement from T+2 days to under 4 seconds.',
-        'Co-developed with the BIS Innovation Hub and Monetary Authority of Singapore (MAS).',
-        'Cuts correspondent banking liquidity costs for international trade by up to 65%.'
-      ],
-      topics: ['Global Economy', 'Geopolitics', 'Singapore Policy'],
-      is_read: false,
-      feedback: 0,
-      bookmarked: false,
-      click_count: 0
-    },
-    {
-      id: 103,
-      guid: 'seed-climate-1',
-      category: 'climate',
-      source_title: 'Carbon Brief',
-      title: 'Global Grid-Scale Sodium-Ion Battery Installations Triple as Utility Storage Costs Fall Below $55/kWh',
-      url: 'https://www.carbonbrief.org',
-      published_at: hoursAgo(2.0),
-      raw_snippet: 'Abundant sodium-ion battery cells free of lithium, cobalt, and nickel have reached commercial parity for stationary solar-plus-storage plants across Asia and Europe. With pack costs dropping below $55/kWh and superior thermal stability in tropical climates, utilities are pairing 8-hour storage blocks with utility-scale PV.',
-      ai_summary: 'Grid-scale sodium-ion battery deployments tripled over the past year as pack costs fell below $55/kWh. Free of lithium and cobalt, the chemistry excels in hot tropical climates and enables 8-hour firm solar dispatch.',
-      key_takeaways: [
-        'Stationary storage pack costs dropped below $55/kWh using abundant sodium salts.',
-        'Eliminates supply-chain bottlenecks around lithium, cobalt, and nickel.',
-        'High thermal resilience makes it ideal for Southeast Asian tropical grids.'
-      ],
-      topics: ['Clean Energy', 'Climate Science', 'ASEAN Economy'],
-      is_read: false,
-      feedback: 0,
-      bookmarked: false,
-      click_count: 0
-    },
-    {
-      id: 104,
-      guid: 'seed-climate-2',
-      category: 'climate',
-      source_title: 'The Guardian - Environment',
-      title: 'Satellite Methane Trackers Pinpoint Ultra-Emitters in Real Time, Prompting Rapid Pipeline Repairs Across 14 Countries',
-      url: 'https://www.theguardian.com/environment',
-      published_at: hoursAgo(5.8),
-      raw_snippet: 'High-resolution hyperspectral satellites operated by international climate coalitions identified over 400 previously unreported methane plumes from oil, gas, and landfill sites. Automated regulatory alerts led operators to seal leaks equivalent to taking 18 million combustion cars off the road.',
-      ai_summary: 'Hyperspectral methane satellites detected 400+ major fugitive emission plumes globally, triggering automated alerts that resulted in verified repairs across 14 countries—equivalent to removing 18 million cars from the road.',
-      key_takeaways: [
-        '400+ super-emitter methane leaks pinpointed from orbit with facility-level precision.',
-        'Rapid valve and pipeline repairs abated emissions equal to 18M vehicles.',
-        'Mandatory satellite verification is now being integrated into LNG import standards.'
-      ],
-      topics: ['Climate Science', 'Space & Physics', 'Clean Energy'],
-      is_read: false,
-      feedback: 0,
-      bookmarked: false,
-      click_count: 0
-    },
-    {
-      id: 105,
-      guid: 'seed-tech-1',
-      category: 'tech',
-      source_title: 'Ars Technica',
-      title: 'Next-Gen Agentic Coding Workflows Cut End-to-End Verification Loops by 60% in Production Repositories',
-      url: 'https://arstechnica.com',
-      published_at: hoursAgo(1.8),
-      raw_snippet: 'Engineering teams adopting multi-step reasoning models with sandboxed terminal execution and automated property-based testing report dramatic reductions in bug escape rates. Rather than single-turn autocomplete, modern agentic harnesses orchestrate dependency migrations, database schema updates, and live integration tests autonomously.',
-      ai_summary: 'Long-context reasoning models paired with sandboxed test execution have reduced verification overhead by 60% across enterprise codebases. Engineering teams are shifting from line-by-line autocomplete to autonomous schema migrations and property-based test verification.',
-      key_takeaways: [
-        'Sandboxed agentic verification reduces production bug escape rates significantly.',
-        '1M-token context windows allow full-repository dependency graph reasoning.',
-        'Shift from IDE autocomplete toward autonomous test-and-repair loops.'
-      ],
-      topics: ['AI & LLMs', 'Software & Cloud'],
-      is_read: false,
-      feedback: 0,
-      bookmarked: false,
-      click_count: 0
-    },
-    {
-      id: 106,
-      guid: 'seed-tech-2',
-      category: 'tech',
-      source_title: 'The Verge',
-      title: 'Silicon Photonics Interconnects Break the Memory Wall for Next-Gen AI Inference Clusters',
-      url: 'https://www.theverge.com',
-      published_at: hoursAgo(4.5),
-      raw_snippet: 'Foundries and optical chip startups demonstrated co-packaged optics (CPO) capable of transferring 1.6 terabits per second per fiber directly between accelerator packages, cutting data center interconnect power consumption by more than half compared to copper.',
-      ai_summary: 'Co-packaged silicon photonics interconnects achieved 1.6 Tbps per optical fiber directly between AI accelerator dies. The breakthrough slashes cluster interconnect power draw by over 50% compared to traditional copper interconnects.',
-      key_takeaways: [
-        'Co-packaged optics (CPO) delivers 1.6 Tbps bandwidth directly chip-to-chip.',
-        'Cuts AI cluster network energy consumption by more than 50%.',
-        'Volume foundry production scheduled for hyperscale deployment next year.'
-      ],
-      topics: ['Semiconductors', 'AI & LLMs', 'Clean Energy'],
-      is_read: false,
-      feedback: 0,
-      bookmarked: false,
-      click_count: 0
-    },
-    {
-      id: 107,
-      guid: 'seed-science-1',
-      category: 'science',
-      source_title: 'Quanta Magazine',
-      title: 'Physicists Observe Fault-Tolerant Logical Qubits Outperforming Physical Qubits Across 1,000 Error-Correction Cycles',
-      url: 'https://www.quantamagazine.org',
-      published_at: hoursAgo(3.0),
-      raw_snippet: 'By encoding quantum information across topological LDPC codes on a neutral-atom processor, researchers suppressed logical error rates exponentially below the physical gate threshold across 1,000 syndrome extraction rounds—a critical milestone toward practical quantum simulation of catalysts and materials.',
-      ai_summary: 'Researchers demonstrated logical qubits encoded with low-density parity-check (LDPC) codes that maintained coherence across 1,000 error-correction cycles. Logical error rates fell exponentially below physical qubit thresholds, paving the way for materials simulation.',
-      key_takeaways: [
-        'Topological LDPC codes require 8x fewer physical qubits per logical qubit than surface codes.',
-        'Sustained below-threshold error suppression across 1,000 consecutive syndrome rounds.',
-        'Opens near-term quantum simulations for nitrogen fixation and battery electrolytes.'
-      ],
-      topics: ['Space & Physics', 'Semiconductors', 'Clean Energy'],
-      is_read: false,
-      feedback: 0,
-      bookmarked: false,
-      click_count: 0
-    },
-    {
-      id: 108,
-      guid: 'seed-science-2',
-      category: 'science',
-      source_title: 'Nature - News & Comment',
-      title: 'Programmable Epigenetic Editors Silence Disease-Causing Genes Durably Without Cutting DNA Strands',
-      url: 'https://www.nature.com',
-      published_at: hoursAgo(7.1),
-      raw_snippet: 'Unlike standard CRISPR-Cas9 nucleases that introduce double-stranded DNA breaks, a new compact epigenetic editor recruits endogenous methylation machinery to switch off target genes in liver and neural tissues permanently while avoiding chromosomal rearrangements.',
-      ai_summary: 'Scientists unveiled a compact epigenetic editor that permanently silences disease-linked genes via targeted DNA methylation without cutting the double helix, eliminating risks of off-target chromosomal breaks.',
-      key_takeaways: [
-        'Silences target genes durably without double-stranded DNA cleavage.',
-        'Avoids genotoxicity and chromosomal translocation risks of classic CRISPR nucleases.',
-        'Demonstrated >92% PCSK9 cholesterol gene repression in preclinical models.'
-      ],
-      topics: ['Biotech & Medicine'],
-      is_read: false,
-      feedback: 0,
-      bookmarked: false,
-      click_count: 0
-    },
-    {
-      id: 109,
-      guid: 'seed-sg-1',
-      category: 'singapore',
-      source_title: 'CNA (Channel NewsAsia) - Singapore',
-      title: 'Singapore Expands Cross-Border Clean Power Imports to 6GW Target by 2035 Amid Data Center Growth',
-      url: 'https://www.channelnewsasia.com/singapore',
-      published_at: hoursAgo(1.5),
-      raw_snippet: 'The Energy Market Authority (EMA) announced new conditional approvals for low-carbon electricity imports from regional ASEAN grids alongside domestic solar and geothermal feasibility pilots. The capacity expansion aims to power next-generation green data centers and semiconductor fabrication plants in Jurong and Tuas while keeping Singapore on track for net-zero emissions by 2050.',
-      ai_summary: 'Singapore’s Energy Market Authority raised its low-carbon electricity import target to 6GW by 2035 through new ASEAN regional grid interconnects. The initiative specifically supports energy-intensive AI data centers and advanced manufacturing in Tuas and Jurong while maintaining national 2050 net-zero commitments.',
-      key_takeaways: [
-        'Low-carbon electricity import target raised to 6GW by 2035 via regional subsea cables.',
-        'Directly supports green AI data center expansion and semiconductor fabs in Jurong & Tuas.',
-        'Includes domestic deep-geothermal and grid-scale battery storage pilot deployments.'
-      ],
-      topics: ['Singapore Policy', 'Clean Energy', 'ASEAN Economy', 'AI & LLMs'],
-      is_read: false,
-      feedback: 0,
-      bookmarked: false,
-      click_count: 0
-    },
-    {
-      id: 110,
-      guid: 'seed-sg-2',
-      category: 'singapore',
-      source_title: 'The Straits Times - Singapore',
-      title: 'LTA Unveils Autonomous Shuttle Corridors and Next-Gen Rail Predictive Maintenance on Cross Island Line',
-      url: 'https://www.straitstimes.com/singapore',
-      published_at: hoursAgo(3.2),
-      raw_snippet: 'The Land Transport Authority (LTA) detailed plans to expand high-capacity autonomous feeder shuttles across Punggol, Tengah, and Jurong Lake District. Simultaneously, AI-driven acoustic and vibration sensors along the upcoming Cross Island Line will detect track wear weeks before faults occur, aiming to boost rail reliability above 2 million train-kilometers between delays.',
-      ai_summary: 'LTA is rolling out autonomous feeder shuttle routes in Tengah, Punggol, and Jurong Lake District alongside AI predictive maintenance on the Cross Island Line. Continuous acoustic track sensing is projected to push MRT reliability past 2 million train-km between delays.',
-      key_takeaways: [
-        'Autonomous electric shuttles expanding to Tengah, Punggol, and Jurong Lake District.',
-        'Cross Island Line integrates real-time acoustic and optical rail diagnostics.',
-        'Targets >2M train-km mean kilometer between failure (MKBF) across the MRT network.'
-      ],
-      topics: ['Public Transport & Urban Planning', 'Singapore Policy', 'AI & LLMs'],
-      is_read: false,
-      feedback: 0,
-      bookmarked: false,
-      click_count: 0
-    },
-    {
-      id: 111,
-      guid: 'seed-sg-3',
-      category: 'singapore',
-      source_title: 'Mothership.sg',
-      title: 'Johor-Singapore Special Economic Zone (JS-SEZ) Launches Passport-Free QR Clearance & Fast-Track Tech Visas',
-      url: 'https://mothership.sg',
-      published_at: hoursAgo(5.0),
-      raw_snippet: 'Businesses operating across Singapore and Iskandar Malaysia can now tap unified customs clearance, QR-code commuter lanes at Woodlands and Tuas checkpoints, and a harmonized talent pass for engineers in renewable energy, logistics, and advanced manufacturing.',
-      ai_summary: 'The Johor-Singapore Special Economic Zone (JS-SEZ) rolled out unified customs channels and QR-code border clearance at Woodlands and Tuas. Cross-border engineering and clean-tech firms also gain access to fast-track regional talent passes.',
-      key_takeaways: [
-        'Unified customs and QR-code clearance live across Woodlands and Tuas checkpoints.',
-        'Targets cross-border supply chains in clean energy, medtech, and logistics.',
-        'Reduces peak-hour commercial cargo turnaround times by up to 40%.'
-      ],
-      topics: ['ASEAN Economy', 'Singapore Policy', 'Public Transport & Urban Planning'],
-      is_read: false,
-      feedback: 0,
-      bookmarked: false,
-      click_count: 0
-    }
-  ];
-}
 
 const state = {
   isStaticMode: false, // Automatically detected on init (true on GitHub Pages, false on local Node server)
@@ -399,22 +162,40 @@ function showToast(message) {
 // Client-Side Scoring & RSS Engine (For GitHub Pages Static Hosting)
 // ============================================================================
 
+function matchesKeywordClient(textLower, kw) {
+  const cleanKw = String(kw || '').trim().toLowerCase();
+  if (!cleanKw) return false;
+  if (cleanKw.length <= 3) {
+    return new RegExp(`\\b${cleanKw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(textLower);
+  }
+  return textLower.includes(cleanKw);
+}
+
 function extractTopicsClient(title = '', snippet = '', category = 'world') {
   const combined = `${title} ${snippet}`.toLowerCase();
   const matched = new Set();
   for (const item of TOPIC_TAXONOMY) {
     for (const kw of item.keywords) {
-      if (kw.length <= 3) {
-        if (new RegExp(`\\b${kw}\\b`, 'i').test(combined)) {
-          matched.add(item.tag);
-          break;
-        }
-      } else if (combined.includes(kw)) {
+      if (matchesKeywordClient(combined, kw)) {
         matched.add(item.tag);
         break;
       }
     }
   }
+  // Also tag articles with user-added custom topics & keywords
+  const customKeywords = state.persona?.topic_keywords || {};
+  for (const [topic, kwList] of Object.entries(customKeywords)) {
+    const terms = [topic, ...(Array.isArray(kwList) ? kwList : [])];
+    if (terms.some(kw => matchesKeywordClient(combined, kw))) {
+      matched.add(topic);
+    }
+  }
+  for (const topic of Object.keys(state.persona?.topic_weights || {})) {
+    if (matchesKeywordClient(combined, topic)) {
+      matched.add(topic);
+    }
+  }
+
   if (matched.size === 0) {
     const fallback = {
       world: 'Geopolitics',
@@ -479,10 +260,13 @@ function scoreArticleClient(article, persona) {
   }
 
   const textLower = `${article.title || ''} ${article.raw_snippet || ''}`.toLowerCase();
+  const customKeywords = persona.topic_keywords || {};
   for (const [topicKey, weight] of Object.entries(topicWeights)) {
     if (topics.some(t => t.toLowerCase() === topicKey.toLowerCase())) continue;
-    if (topicKey.length >= 3 && textLower.includes(topicKey.toLowerCase())) {
-      topicDelta += weight * 1.4;
+    const kwList = Array.isArray(customKeywords[topicKey]) ? customKeywords[topicKey] : [];
+    const terms = [topicKey, ...kwList];
+    if (terms.some(term => term.length >= 2 && matchesKeywordClient(textLower, term))) {
+      topicDelta += weight * 1.6;
       if (weight >= 1.5) matchedLikedTopics.push({ topic: topicKey, weight });
       if (weight <= -1.5) matchedDislikedTopics.push({ topic: topicKey, weight });
     }
@@ -674,6 +458,9 @@ function mergeWithDefaultFeeds(storedFeeds) {
 
 function recalculateStaticScores() {
   for (const art of state.allArticles) {
+    if (!art.is_ai_ranked) {
+      art.topics = extractTopicsClient(art.title, art.raw_snippet, art.category);
+    }
     const computed = scoreArticleClient(art, state.persona);
     if (art.is_ai_ranked && art.base_score) {
       art.relevance_score = Math.max(5, Math.min(99, Math.round(art.base_score * 0.55 + computed.relevance_score * 0.45)));
@@ -860,9 +647,11 @@ async function initAppModeAndState() {
     state.isStaticMode = true;
     state.categories = DEFAULT_CATEGORIES;
     state.persona = JSON.parse(localStorage.getItem('pulse_persona_v2') || 'null') || structuredClone(DEFAULT_PERSONA);
+    if (!state.persona.topic_keywords) state.persona.topic_keywords = {};
     const storedFeeds = JSON.parse(localStorage.getItem('pulse_feeds_v2') || 'null');
     state.feeds = mergeWithDefaultFeeds(storedFeeds);
-    state.allArticles = JSON.parse(localStorage.getItem('pulse_articles_v2') || 'null') || getInitialSeedArticles();
+    const cachedArticles = JSON.parse(localStorage.getItem('pulse_articles_v2') || 'null') || [];
+    state.allArticles = cachedArticles.filter(a => !String(a.guid || '').startsWith('seed-'));
     state.recentLogs = JSON.parse(localStorage.getItem('pulse_logs_v2') || '[]');
     const savedKey = localStorage.getItem('pulse_gemini_key') || '';
     const savedModel = localStorage.getItem('pulse_gemini_model') || 'gemini-3.8-flash';
@@ -1004,11 +793,8 @@ function renderNavigation() {
       document.getElementById('briefing-panel').classList.add('hidden');
       renderNavigation();
       await loadArticles();
-      // Auto-sync live RSS articles if this category currently only has demo seed articles
-      if (
-        state.activeCategory !== 'saved' &&
-        state.articles.every(a => String(a.guid).startsWith('seed-'))
-      ) {
+      // Auto-sync live RSS articles when opening a category with no articles yet
+      if (state.activeCategory !== 'saved' && state.articles.length === 0) {
         triggerSyncFeeds(true);
       }
     });
@@ -1255,10 +1041,6 @@ function renderPersonaSidebar() {
     bioInput.value = state.persona.bio_summary || '';
   }
 
-  document.querySelectorAll('#depth-pills .depth-pill').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.depth === (state.persona.preferred_depth || 'balanced'));
-  });
-
   // Topic Affinities Cloud
   const entries = Object.entries(state.persona.topic_weights || {}).sort((a, b) => b[1] - a[1]);
   const liked = entries.filter(([, w]) => w > 0);
@@ -1300,7 +1082,9 @@ function renderPersonaSidebar() {
       const topic = btn.dataset.removeTopic;
       const copy = { ...(state.persona.topic_weights || {}) };
       delete copy[topic];
-      await updatePersonaState({ topic_weights: copy });
+      const kwCopy = { ...(state.persona.topic_keywords || {}) };
+      delete kwCopy[topic];
+      await updatePersonaState({ topic_weights: copy, topic_keywords: kwCopy });
       showToast(`Removed topic "${topic}"`);
     });
   });
@@ -1638,35 +1422,45 @@ function bindGlobalListeners() {
     document.getElementById('briefing-panel').classList.add('hidden');
   });
 
-  // Persona Bio save & depth selector
+  // Persona Bio save
   document.getElementById('btn-save-bio').addEventListener('click', async () => {
     const bio = document.getElementById('persona-bio-input').value.trim();
     await updatePersonaState({ bio_summary: bio });
     showToast('Saved persona bio & updated rankings');
   });
 
-  document.querySelectorAll('#depth-pills .depth-pill').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const depth = btn.dataset.depth;
-      await updatePersonaState({ preferred_depth: depth });
-      showToast(`Summary style set to ${depth}`);
-    });
-  });
-
-  // Add custom topic weight
+  // Add custom topic weight + optional keywords
   document.getElementById('form-add-topic').addEventListener('submit', async e => {
     e.preventDefault();
     const input = document.getElementById('input-new-topic');
+    const kwInput = document.getElementById('input-new-topic-keywords');
     const weight = Number(document.getElementById('select-new-topic-weight').value);
     const topic = input.value.trim();
     if (!topic) return;
+
+    const rawKws = (kwInput?.value || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
 
     const updatedTopics = {
       ...(state.persona.topic_weights || {}),
       [topic]: weight
     };
+    const updatedKeywords = {
+      ...(state.persona.topic_keywords || {})
+    };
+    if (rawKws.length > 0) {
+      updatedKeywords[topic] = rawKws;
+    }
+
     input.value = '';
-    await updatePersonaState({ topic_weights: updatedTopics });
+    if (kwInput) kwInput.value = '';
+
+    await updatePersonaState({
+      topic_weights: updatedTopics,
+      topic_keywords: updatedKeywords
+    });
     showToast(`Added "${topic}" (${weight > 0 ? '+' : ''}${weight}) to persona`);
   });
 
@@ -1874,8 +1668,8 @@ function bindGlobalListeners() {
   bindGlobalListeners();
   await initAppModeAndState();
   await loadArticles();
-  // Auto-fetch live RSS articles on initial launch if only seed placeholder articles are present
-  if (state.articles.every(a => String(a.guid).startsWith('seed-'))) {
+  // Auto-fetch live RSS articles on initial launch if category is empty
+  if (state.activeCategory !== 'saved' && state.articles.length === 0) {
     triggerSyncFeeds(true);
   }
 })();

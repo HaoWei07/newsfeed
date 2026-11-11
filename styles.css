@@ -1055,11 +1055,17 @@ body {
 /* Topic Affinities Cloud */
 .add-topic-form {
   display: flex;
-  gap: 5px;
+  flex-direction: column;
+  gap: 6px;
   margin-bottom: 10px;
 }
 
-.add-topic-form input {
+.add-topic-row {
+  display: flex;
+  gap: 5px;
+}
+
+.add-topic-row input {
   flex: 1;
   min-width: 0;
   background: var(--bg-input);
@@ -1070,13 +1076,23 @@ body {
   font-size: 12px;
 }
 
-.add-topic-form select {
+.add-topic-row select {
   background: var(--bg-input);
   border: 1px solid var(--border-subtle);
   border-radius: 6px;
   color: var(--text-primary);
   font-size: 11.5px;
   padding: 4px 6px;
+}
+
+.add-topic-keywords-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: var(--text-secondary);
+  font-size: 11.5px;
 }
 
 .topic-group-label {
