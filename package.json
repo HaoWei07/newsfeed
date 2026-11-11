@@ -1,0 +1,15 @@
+{
+  "name": "pulse-rss-reader",
+  "version": "1.0.0",
+  "description": "AI-powered personalized RSS news reader with dynamic persona learning, article summaries, and relevance ranking across 5 categories",
+  "type": "module",
+  "scripts": {
+    "start": "node --no-warnings server.js",
+    "dev": "node --no-warnings --watch server.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.29.1",
+    "express": "^5.1.0",
+    "fast-xml-parser": "^5.0.9"
+  }
+}
