@@ -1,26 +1,28 @@
 {
-  "updated_at": "2026-11-11T10:17:44.802Z",
+  "updated_at": "2026-11-11T10:18:21.567Z",
   "persona": {
     "bio_summary": "Curious reader based in Singapore who follows global geopolitics, climate tech and clean energy policy, AI & software breakthroughs, fundamental science discoveries, and Singapore urban/economic developments. Prefers high-signal, analytical reporting over sensationalism or clickbait.",
     "preferred_depth": "balanced",
     "topic_weights": {
       "Geology & Geotechnics": 6,
       "Geodesy & Geospatial Analytics": 6,
-      "Clean Energy": 5,
-      "Climate Science": 5,
+      "Clean Energy": 6,
+      "Climate Science": 6,
       "AI & LLMs": 4.5,
       "Singapore Policy": 4,
-      "Geopolitics": 3,
+      "Geopolitics": 4,
       "Space & Physics": 3,
       "Biotech & Medicine": 2.5,
       "ASEAN Economy": 3.5,
-      "Public Transport & Urban Planning": 3,
+      "Public Transport & Urban Planning": 4,
       "Celebrity Gossip": -5,
       "Sponsored Content": -6
     },
     "topic_keywords": {},
-    "source_weights": {},
-    "interactions_count": 0,
+    "source_weights": {
+      "The Guardian - Environment": 0.4
+    },
+    "interactions_count": 1,
     "interactions_since_synthesis": 0
   },
   "feeds": [
@@ -216,6 +218,12 @@
       "article_title": "Senate advances bill to speed up projects from gas pipelines to clean energy",
       "action": "click",
       "delta_summary": "Read article: Clean Energy (+1), Climate Science (+1), Geopolitics (+1), Public Transport & Urban Planning (+1)",
+      "created_at": "2026-11-11T10:18:20.312Z"
+    },
+    {
+      "article_title": "Senate advances bill to speed up projects from gas pipelines to clean energy",
+      "action": "click",
+      "delta_summary": "Read article: Clean Energy (+1), Climate Science (+1), Geopolitics (+1), Public Transport & Urban Planning (+1)",
       "created_at": "2026-11-11T10:17:31.987Z"
     },
     {
@@ -266,7 +274,7 @@
       "is_read": true,
       "feedback": 0,
       "bookmarked": false,
-      "click_count": 1
+      "click_count": 2
     },
     "https://www.bbc.co.uk/news/articles/cm0e0evlpp87o#1": {
       "is_read": true,
