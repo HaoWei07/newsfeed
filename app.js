@@ -68,11 +68,12 @@ const DEFAULT_PERSONA = {
     'Curious reader based in Singapore who follows global geopolitics, climate tech and clean energy policy, AI & software breakthroughs, fundamental science discoveries, and Singapore urban/economic developments. Prefers high-signal, analytical reporting over sensationalism or clickbait.',
   preferred_depth: 'balanced',
   topic_weights: {
-    'AI & LLMs': 4.5,
+    'Geology & Geotechnics': 6.0,
+	'Geodesy & Geospatial Analytics': 6.0,
+	'Clean Energy': 5,
+    'Climate Science': 5.0,
+	'AI & LLMs': 4.5,
     'Singapore Policy': 4.0,
-    'Clean Energy': 3.5,
-    'Climate Science': 3.5,
-    'Semiconductors': 3.0,
     'Geopolitics': 3.0,
     'Space & Physics': 3.0,
     'Biotech & Medicine': 2.5,
@@ -88,20 +89,21 @@ const DEFAULT_PERSONA = {
 };
 
 const TOPIC_TAXONOMY = [
-  { tag: 'AI & LLMs', keywords: ['ai', 'llm', 'artificial intelligence', 'gemini', 'openai', 'anthropic', 'deepmind', 'neural', 'machine learning', 'agentic', 'gpt', 'transformer', 'robotics'] },
-  { tag: 'Semiconductors', keywords: ['chip', 'semiconductor', 'nvidia', 'tsmc', 'gpu', 'wafer', 'intel', 'amd', 'foundry', 'silicon', 'asic', 'tpu'] },
-  { tag: 'Software & Cloud', keywords: ['open source', 'linux', 'cloud', 'kubernetes', 'rust', 'typescript', 'developer', 'github', 'browser', 'database', 'api', 'programming'] },
-  { tag: 'Cybersecurity & Privacy', keywords: ['cybersecurity', 'hack', 'vulnerability', 'encryption', 'ransomware', 'zero-day', 'privacy', 'surveillance', 'breach'] },
-  { tag: 'Clean Energy', keywords: ['solar', 'wind power', 'battery', 'grid', 'renewable', 'nuclear', 'fusion', 'hydrogen', 'ev', 'electric vehicle', 'clean energy', 'geothermal', 'energy transition'] },
-  { tag: 'Climate Science', keywords: ['climate', 'warming', 'emissions', 'carbon', 'co2', 'methane', 'ipcc', 'glacier', 'sea level', 'extreme weather', 'el nino', 'deforestation', 'net zero'] },
-  { tag: 'Biodiversity & Nature', keywords: ['biodiversity', 'species', 'conservation', 'ocean', 'coral', 'wildlife', 'ecosystem', 'rainforest', 'marine', 'extinction', 'pollution', 'plastics'] },
-  { tag: 'Space & Physics', keywords: ['nasa', 'spacex', 'telescope', 'jwst', 'quantum', 'physics', 'astronomy', 'exoplanet', 'black hole', 'mars', 'lunar', 'cosmology', 'cern', 'particle'] },
-  { tag: 'Biotech & Medicine', keywords: ['crispr', 'gene', 'vaccine', 'clinical trial', 'longevity', 'neuroscience', 'brain', 'cancer', 'protein', 'microbiome', 'biotech', 'stem cell', 'rna'] },
+  { tag: 'AI & LLMs', keywords: ['ai', 'llm', 'artificial intelligence', 'gemini', 'openai', 'anthropic', 'deepmind', 'neural', 'machine learning', 'agentic', 'gpt', 'transformer', 'robotics', 'rag', 'genai', 'copilot'] },
+  { tag: 'Software & Cloud', keywords: ['open source', 'linux', 'cloud', 'kubernetes', 'rust', 'typescript', 'developer', 'github', 'browser', 'database', 'api', 'programming', 'python', 'data analytics', 'sql', 'docker'] },
+  { tag: 'Cybersecurity & Privacy', keywords: ['cybersecurity', 'hack', 'vulnerability', 'encryption', 'ransomware', 'zero-day', 'privacy', 'surveillance', 'breach', 'phishing', 'malware'] },
+  { tag: 'Clean Energy', keywords: ['solar', 'wind power', 'battery', 'grid', 'renewable', 'nuclear', 'fusion', 'hydrogen', 'ev', 'electric vehicle', 'clean energy', 'geothermal', 'energy transition', 'decarbonization', 'green steel'] },
+  { tag: 'Climate Science', keywords: ['climate', 'warming', 'emissions', 'carbon', 'co2', 'methane', 'ipcc', 'glacier', 'sea level', 'extreme weather', 'el nino', 'deforestation', 'net zero', 'air pollution'] },
+  { tag: 'Biodiversity & Nature', keywords: ['biodiversity', 'species', 'conservation', 'ocean', 'coral', 'wildlife', 'ecosystem', 'rainforest', 'marine', 'extinction', 'pollution', 'plastics', 'land-use', 'sustainability'] },
+  { tag: 'Space & Physics', keywords: ['nasa', 'spacex', 'telescope', 'jwst', 'quantum', 'physics', 'astronomy', 'exoplanet', 'black hole', 'mars', 'lunar', 'cosmology', 'cern', 'particle', 'satellite'] },
+  { tag: 'Biotech & Medicine', keywords: ['crispr', 'gene', 'vaccine', 'clinical trial', 'longevity', 'neuroscience', 'brain', 'cancer', 'protein', 'microbiome', 'biotech', 'stem cell', 'rna', 'public health'] },
   { tag: 'Geopolitics', keywords: ['diplomacy', 'sanctions', 'nato', 'united nations', 'treaty', 'summit', 'foreign policy', 'security', 'conflict', 'ceasefire', 'trade war', 'tariff', 'election'] },
-  { tag: 'Global Economy', keywords: ['inflation', 'central bank', 'fed', 'interest rate', 'gdp', 'supply chain', 'imf', 'markets', 'recession', 'trade', 'bonds', 'manufactur'] },
-  { tag: 'Singapore Policy', keywords: ['pap', 'parliament', 'ministry', 'hdb', 'cpf', 'mas', 'monetary authority of singapore', 'ndp', 'singapore government', 'statutory', 'minister', 'budget'] },
-  { tag: 'Public Transport & Urban Planning', keywords: ['mrt', 'lta', 'bus', 'changi', 'bto', 'urban', 'tuas', 'jurong', 'cross island line', 'thomson-east coast', 'coe', 'erp', 'housing'] },
-  { tag: 'ASEAN Economy', keywords: ['asean', 'johor', 'js-sez', 'malaysia', 'indonesia', 'vietnam', 'southeast asia', 'strait of malacca', 'regional hub'] }
+  { tag: 'Global Economy', keywords: ['inflation', 'central bank', 'fed', 'interest rate', 'gdp', 'supply chain', 'imf', 'markets', 'recession', 'trade', 'bonds', 'manufacturing', 'yield curve', 'treasuries', 'macroeconomics'] },
+  { tag: 'Singapore Policy', keywords: ['pap', 'parliament', 'ministry', 'hdb', 'cpf', 'mas', 'monetary authority of singapore', 'ndp', 'singapore government', 'statutory', 'minister', 'budget', 'sla', 'ura', 'nea'] },
+  { tag: 'Public Transport & Urban Planning', keywords: ['mrt', 'lta', 'bus', 'changi', 'bto', 'urban', 'tuas', 'jurong', 'cross island line', 'thomson-east coast', 'coe', 'erp', 'housing', 'infrastructure', 'spatial planning'] },
+  { tag: 'ASEAN Economy', keywords: ['asean', 'johor', 'js-sez', 'malaysia', 'indonesia', 'vietnam', 'southeast asia', 'strait of malacca', 'regional hub', 'fdi'] },
+  { tag: 'Geology & Geotechnics', keywords: ['geology', 'geosciences', 'soil mechanics', 'subsurface', 'geotechnical', 'mapping', 'earth materials', 'stratigraphy', 'petrology', 'geomorphology', 'earth system', 'site investigation'] },
+  { tag: 'Geodesy & Geospatial Analytics', keywords: ['geodesy', 'geospatial', 'geomatics', 'gnss', 'rtk', 'ppp', 'insar', 'radar', 'remote sensing', 'gis', 'qgis', 'arcgis', 'spatial modeling', 'geopandas', 'sirent', 'bathymetry', 'cartography', 'spatial infrastructure'] }
 ];
 
 const state = {
@@ -648,6 +650,13 @@ async function initAppModeAndState() {
     state.categories = DEFAULT_CATEGORIES;
     state.persona = JSON.parse(localStorage.getItem('pulse_persona_v2') || 'null') || structuredClone(DEFAULT_PERSONA);
     if (!state.persona.topic_keywords) state.persona.topic_keywords = {};
+    if (!Array.isArray(state.persona.dismissed_topics)) state.persona.dismissed_topics = [];
+    // Merge any newly added default topic weights from code unless explicitly dismissed
+    for (const [k, w] of Object.entries(DEFAULT_PERSONA.topic_weights)) {
+      if (state.persona.topic_weights[k] === undefined && !state.persona.dismissed_topics.includes(k)) {
+        state.persona.topic_weights[k] = w;
+      }
+    }
     const storedFeeds = JSON.parse(localStorage.getItem('pulse_feeds_v2') || 'null');
     state.feeds = mergeWithDefaultFeeds(storedFeeds);
     const cachedArticles = JSON.parse(localStorage.getItem('pulse_articles_v2') || 'null') || [];
@@ -1084,7 +1093,8 @@ function renderPersonaSidebar() {
       delete copy[topic];
       const kwCopy = { ...(state.persona.topic_keywords || {}) };
       delete kwCopy[topic];
-      await updatePersonaState({ topic_weights: copy, topic_keywords: kwCopy });
+      const dismissed = Array.from(new Set([...(state.persona.dismissed_topics || []), topic]));
+      await updatePersonaState({ topic_weights: copy, topic_keywords: kwCopy, dismissed_topics: dismissed });
       showToast(`Removed topic "${topic}"`);
     });
   });
